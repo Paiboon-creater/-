@@ -53,7 +53,7 @@
 
         /* คอนเทนเนอร์และตาราง */
         .table-container {
-            width: 100%; max-width: 1300px; margin: 0 auto;
+            width: 100%; max-width: 1400px; margin: 0 auto;
             background: var(--panel-bg); border: 1px solid rgba(0, 255, 65, 0.3);
             box-shadow: 0 0 30px rgba(0, 255, 65, 0.1); border-radius: 12px;
             backdrop-filter: blur(10px); padding: 30px; overflow-x: auto;
@@ -74,9 +74,9 @@
         }
 
         th {
-            padding: 12px 15px; font-weight: 600; color: #ffffff;
+            padding: 12px 10px; font-weight: 600; color: #ffffff;
             font-size: 0.95rem; vertical-align: top;
-            min-width: 140px; /* บังคับความกว้างขั้นต่ำไม่ให้ช่องบีบกัน */
+            min-width: 130px; /* บังคับความกว้างขั้นต่ำ */
         }
 
         /* จัดระเบียบข้อความหัวตารางและช่องกรองให้อยู่บน-ล่าง */
@@ -93,15 +93,18 @@
         .sort-icon { font-size: 0.85rem; color: #555; transition: 0.2s; }
         .sort-icon.active { color: var(--neon-green); }
 
-        .filter-select {
+        /* กล่องตัวกรองแบบ Select และ Input */
+        .filter-select, .filter-input {
             width: 100%; padding: 6px; background: #031207;
             color: var(--neon-green); border: 1px solid var(--neon-green);
             border-radius: 4px; font-size: 0.85rem; outline: none; cursor: pointer;
         }
         .filter-select option { background: #031207; color: #fff; }
+        .filter-input { cursor: text; }
+        .filter-input::placeholder { color: #2e6c43; font-style: italic; }
 
         td {
-            padding: 12px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             font-size: 0.95rem; font-weight: 400;
         }
 
@@ -110,6 +113,7 @@
 
         /* สีพิเศษสำหรับข้อมูล */
         .col-order { color: #00ffff; font-weight: bold; }
+        .col-po { color: #ffb347; } /* สีสำหรับ PO */
         .col-work { color: #e2e8f0; }
         .col-step { color: #a855f7; font-weight: 600; }
         .col-qty { color: #ffffff; }
@@ -165,7 +169,18 @@
                                 <span>เลขที่ใบสั่ง</span>
                                 <i id="sort-orderNo" class="fa-solid fa-sort sort-icon"></i>
                             </div>
-                            <select id="filterOrder" class="filter-select" onclick="event.stopPropagation()" onchange="applyFilters()">
+                            <!-- เปลี่ยนเป็นช่อง Input สามารถพิมพ์ค้นหาได้ -->
+                            <input type="text" id="filterOrder" class="filter-input" placeholder="พิมพ์ค้นหาใบสั่ง..." list="orderList" oninput="applyFilters()" onclick="event.stopPropagation()">
+                            <datalist id="orderList"></datalist>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="th-content">
+                            <div class="th-title-row" onclick="sortBy('poNo')">
+                                <span>เลขที่ PO</span>
+                                <i id="sort-poNo" class="fa-solid fa-sort sort-icon"></i>
+                            </div>
+                            <select id="filterPo" class="filter-select" onclick="event.stopPropagation()" onchange="applyFilters()">
                                 <option value="ALL">ทั้งหมด</option>
                             </select>
                         </div>
@@ -184,7 +199,7 @@
                     <th>
                         <div class="th-content">
                             <div class="th-title-row" onclick="sortBy('stepName')">
-                                <span>ขั้นตอนการทำงาน</span>
+                                <span>ขั้นตอนทำงาน</span>
                                 <i id="sort-stepName" class="fa-solid fa-sort sort-icon"></i>
                             </div>
                             <select id="filterStep" class="filter-select" onclick="event.stopPropagation()" onchange="applyFilters()">
@@ -192,26 +207,25 @@
                             </select>
                         </div>
                     </th>
-                    <th style="min-width: 120px;">
+                    <th style="min-width: 100px;">
                         <div class="th-content">
                             <div class="th-title-row" onclick="sortBy('qty')" style="justify-content: flex-end;">
                                 <i id="sort-qty" class="fa-solid fa-sort sort-icon" style="margin-right: 8px;"></i>
-                                <span>ยอดสั่ง (ชิ้น)</span>
-                            </div>
-                            <!-- เว้นช่องว่างไว้ให้สมดุลกับช่องที่มี Filter -->
-                            <div style="height: 28px;"></div>
-                        </div>
-                    </th>
-                    <th style="min-width: 120px;">
-                        <div class="th-content">
-                            <div class="th-title-row" onclick="sortBy('produced')" style="justify-content: flex-end;">
-                                <i id="sort-produced" class="fa-solid fa-sort sort-icon" style="margin-right: 8px;"></i>
-                                <span>ผลิตได้ (ชิ้น)</span>
+                                <span>ยอดสั่ง(ชิ้น)</span>
                             </div>
                             <div style="height: 28px;"></div>
                         </div>
                     </th>
                     <th style="min-width: 100px;">
+                        <div class="th-content">
+                            <div class="th-title-row" onclick="sortBy('produced')" style="justify-content: flex-end;">
+                                <i id="sort-produced" class="fa-solid fa-sort sort-icon" style="margin-right: 8px;"></i>
+                                <span>ผลิตได้(ชิ้น)</span>
+                            </div>
+                            <div style="height: 28px;"></div>
+                        </div>
+                    </th>
+                    <th style="min-width: 80px;">
                         <div class="th-content">
                             <div class="th-title-row" onclick="sortBy('percent')" style="justify-content: flex-end;">
                                 <i id="sort-percent" class="fa-solid fa-sort sort-icon" style="margin-right: 8px;"></i>
@@ -239,7 +253,7 @@
             </thead>
             <tbody id="tableBody">
                 <tr>
-                    <td colspan="7" class="loading-row">
+                    <td colspan="8" class="loading-row">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> กำลังดึงข้อมูลทั้งหมด กรุณารอสักครู่...
                     </td>
                 </tr>
@@ -300,8 +314,9 @@
 
     async function fetchAllData() {
         try {
+            // ดึงข้อมูลเพิ่ม po_no มาจากตาราง orders
             const [ordersRes, targetsRes, stepsRes, orderStepsRes, allProdRes, workItemsRes] = await Promise.all([
-                fetch(`${SUPABASE_URL}/orders?select=id_order,order_no,quantity,id_work&limit=10000`, { headers }),
+                fetch(`${SUPABASE_URL}/orders?select=id_order,order_no,po_no,quantity,id_work&limit=10000`, { headers }),
                 fetch(`${SUPABASE_URL}/targets?select=id_target,id_step,id_work&limit=10000`, { headers }),
                 fetch(`${SUPABASE_URL}/production_steps?select=id_step,step_name&limit=10000`, { headers }),
                 fetch(`${SUPABASE_URL}/order_steps?select=id_order,id_step,end_date&limit=10000`, { headers }),
@@ -368,6 +383,7 @@
 
                 rawData.push({
                     orderNo: order.order_no || "-",
+                    poNo: order.po_no || "-", // เพิ่ม PO Number
                     workCode: workCodeText,
                     stepName: step ? step.step_name : "-",
                     qty: qty,
@@ -383,24 +399,27 @@
         } catch (error) {
             console.error("Fetch Error:", error);
             document.getElementById('tableBody').innerHTML = `
-                <tr><td colspan="7" class="status-red" style="text-align: center; padding: 20px;">
+                <tr><td colspan="8" class="status-red" style="text-align: center; padding: 20px;">
                     <i class="fa-solid fa-triangle-exclamation"></i> ไม่สามารถเชื่อมต่อฐานข้อมูลได้
                 </td></tr>`;
         }
     }
 
-    // ---- ระบบจัดเรียง (Sorting) ----
+    // ---- ระบบจัดเรียง (Sorting) สลับการเรียงเมื่อกดซ้ำ ----
     function sortBy(key) {
         initAudio(); playMetallicClick();
         if (currentSort.key === key) {
+            // ถ้ากดที่คอลัมน์เดิม ให้สลับ ASC เป็น DESC หรือ DESC เป็น ASC
             currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
         } else {
+            // ถ้ากดคอลัมน์ใหม่ เริ่มต้นด้วย ASC เสมอ
             currentSort.key = key;
             currentSort.order = 'asc';
         }
         applyFilters(); 
     }
 
+    // อัปเดตไอคอนจัดเรียง (ลูกศรขึ้น/ลง)
     function updateSortIcons() {
         document.querySelectorAll('.sort-icon').forEach(icon => {
             icon.className = 'fa-solid fa-sort sort-icon';
@@ -415,14 +434,18 @@
 
     // ---- ระบบกรองข้อมูล (Filters) ----
     function applyFilters() {
-        let fOrder = document.getElementById('filterOrder').value;
+        let fOrder = document.getElementById('filterOrder').value.trim().toLowerCase();
+        let fPo = document.getElementById('filterPo').value;
         let fWork = document.getElementById('filterWork').value;
         let fStep = document.getElementById('filterStep').value;
         let fStatus = document.getElementById('filterStatus').value;
 
-        // 1. กรอง
+        // 1. กรอง (รองรับการพิมพ์บางส่วนสำหรับช่องใบสั่ง)
         filteredData = rawData.filter(item => {
-            return (fOrder === 'ALL' || item.orderNo === fOrder) &&
+            let matchOrder = (fOrder === '' || item.orderNo.toLowerCase().includes(fOrder));
+            
+            return matchOrder &&
+                   (fPo === 'ALL' || item.poNo === fPo) &&
                    (fWork === 'ALL' || item.workCode === fWork) &&
                    (fStep === 'ALL' || item.stepName === fStep) &&
                    (fStatus === 'ALL' || item.statusCat === fStatus);
@@ -444,8 +467,9 @@
             }
         });
 
-        // 3. อัปเดต UI 
-        updateDropdownOptions('filterOrder', 'orderNo', fOrder);
+        // 3. อัปเดต UI Dropdown และ Datalist
+        updateDatalistOptions('orderList', 'orderNo'); // อัปเดตลิสต์ใบสั่งสำหรับค้นหา
+        updateDropdownOptions('filterPo', 'poNo', fPo);
         updateDropdownOptions('filterWork', 'workCode', fWork);
         updateDropdownOptions('filterStep', 'stepName', fStep);
         
@@ -455,6 +479,19 @@
         renderTable();
     }
 
+    // อัปเดต Datalist (สำหรับช่องกรอกข้อมูล)
+    function updateDatalistOptions(listId, dataKey) {
+        let uniqueValues = [...new Set(rawData.map(item => item[dataKey]))].sort();
+        const list = document.getElementById(listId);
+        list.innerHTML = '';
+        uniqueValues.forEach(val => {
+            let opt = document.createElement('option');
+            opt.value = val;
+            list.appendChild(opt);
+        });
+    }
+
+    // อัปเดต Dropdown ปกติ (Select)
     function updateDropdownOptions(selectId, dataKey, currentValue) {
         let uniqueValues = [...new Set(filteredData.map(item => item[dataKey]))].sort();
         if (currentValue !== 'ALL' && !uniqueValues.includes(currentValue)) {
@@ -484,13 +521,14 @@
         let pageData = filteredData.slice(startIndex, endIndex);
 
         if (pageData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#9ca3af;">ไม่พบข้อมูลที่ตรงกับตัวกรอง</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#9ca3af;">ไม่พบข้อมูลที่ตรงกับตัวกรอง</td></tr>`;
         } else {
             let htmlRows = "";
             pageData.forEach(item => {
                 htmlRows += `
                     <tr>
                         <td class="col-order">${item.orderNo}</td>
+                        <td class="col-po">${item.poNo}</td>
                         <td class="col-work">${item.workCode}</td>
                         <td class="col-step">${item.stepName}</td>
                         <td class="col-qty" style="text-align: right;">${item.qty.toLocaleString()}</td>
