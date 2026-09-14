@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- โหลดไลบรารีสำหรับสร้าง QR Code ตอนพรีวิวพิมพ์ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- โหลด Supabase JS Client เพื่อใช้ Realtime -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         :root {
@@ -146,6 +148,14 @@
         .btn-page:hover:not(:disabled) { background: #f1f5f9; color: #1e293b; border-color: #94a3b8; }
         .btn-page:disabled { background: #f8f9fa; color: #adb5bd; border-color: #e9ecef; cursor: not-allowed; }
 
+        /* Badge แสดงสถานะ Real-time Connection */
+        .realtime-badge {
+            display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem;
+            background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 12px; font-weight: 500;
+            margin-left: 10px; vertical-align: middle;
+        }
+        .realtime-dot { width: 7px; height: 7px; background: #22c55e; border-radius: 50%; animation: pulse 1.5px infinite; }
+
         /* Modal พรีวิวใบความก้าวหน้าของการผลิต */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -177,7 +187,6 @@
         .print-label { white-space: nowrap; margin-bottom: -1px; }
         .print-value { border-bottom: 1px dotted #000; padding-left: 6px; min-height: 18px; flex: 1; }
         
-        /* ปรับแต่งกล่อง QR Code ให้สแกนง่ายยิ่งขึ้น */
         .print-qr-box { text-align: center; border: 2px solid #000; padding: 6px; background: #fff; min-width: 95px; margin-left: 8px; }
         .print-qr-box canvas, .print-qr-box img { width: 75px !important; height: 75px !important; display: block; margin: 0 auto; image-rendering: pixelated; }
         .print-qr-box span { display: block; font-size: 0.65rem; margin-top: 3px; font-weight: bold; }
@@ -194,7 +203,6 @@
 
         .print-footer { display: flex; justify-content: space-between; font-size: 0.7rem; border-top: 1.5px solid #000; padding-top: 4px; font-weight: bold; }
 
-        /* สำหรับสั่งพิมพ์ A4 แนวนอน (Landscape) */
         @media print {
             body * { visibility: hidden; }
             #meterModal, #meterModal * { visibility: visible; }
@@ -224,7 +232,7 @@
 
     <div class="table-container">
         <div class="header-title">
-            <h1>สรุปงานผลิตทั้งหมดในระบบ</h1>
+            <h1>สรุปงานผลิตทั้งหมดในระบบ <span class="realtime-badge"><span class="realtime-dot"></span> Real-time Active</span></h1>
             <p>คลิกที่แถวรายการเพื่อดูพรีวิว "ใบความก้าวหน้าของการผลิต" (คู่ซ้าย-ขวา A4 แนวนอน)</p>
         </div>
 
@@ -337,7 +345,7 @@
             <tbody id="tableBody">
                 <tr>
                     <td colspan="10" class="loading-row">
-                        <i class="fa-solid fa-circle-notch fa-spin"></i> กำลังดึงข้อมูลทั้งหมด กรุณารอสักครู่...
+                        <i class="fa-solid fa-circle-notch fa-spin"></i> กำลังดึงข้อมูลและเชื่อมต่อ Real-time...
                     </td>
                 </tr>
             </tbody>
@@ -393,9 +401,12 @@
     </div>
 
 <script>
-    const SUPABASE_URL = "https://siiiifesdjuunwmwozfb.supabase.co/rest/v1";
+    const SUPABASE_URL = "https://siiiifesdjuunwmwozfb.supabase.co";
     const SUPABASE_KEY = "sb_publishable_ohToE8Z_Fzo87uBtzdPDIg_cqHCi3HT";
-    const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" };
+    const restHeaders = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" };
+
+    // สร้าง Supabase Client สำหรับ Real-time
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let rawData = [];
     let filteredData = [];
@@ -416,13 +427,13 @@
     async function fetchAllData() {
         try {
             const [ordersRes, targetsRes, stepsRes, orderStepsRes, allProdRes, workItemsRes, employeesRes] = await Promise.all([
-                fetch(`${SUPABASE_URL}/orders?select=id_order,order_no,po_no,quantity,id_work,start_date,end_date&limit=10000`, { headers }),
-                fetch(`${SUPABASE_URL}/targets?select=id_target,id_step,id_work&limit=10000`, { headers }),
-                fetch(`${SUPABASE_URL}/production_steps?select=id_step,step_name&limit=10000`, { headers }),
-                fetch(`${SUPABASE_URL}/order_steps?select=id_order,id_step,end_date,start_date&limit=10000`, { headers }),
-                fetch(`${SUPABASE_URL}/daily_production?select=*&limit=10000`, { headers }),
-                fetch(`${SUPABASE_URL}/work_items?select=id_work,work_code&limit=10000`, { headers }),
-                fetch(`${SUPABASE_URL}/employees?select=id_name,name&limit=10000`, { headers })
+                fetch(`${SUPABASE_URL}/rest/v1/orders?select=id_order,order_no,po_no,quantity,id_work,start_date,end_date&limit=10000`, { headers: restHeaders }),
+                fetch(`${SUPABASE_URL}/rest/v1/targets?select=id_target,id_step,id_work&limit=10000`, { headers: restHeaders }),
+                fetch(`${SUPABASE_URL}/rest/v1/production_steps?select=id_step,step_name&limit=10000`, { headers: restHeaders }),
+                fetch(`${SUPABASE_URL}/rest/v1/order_steps?select=id_order,id_step,end_date,start_date&limit=10000`, { headers: restHeaders }),
+                fetch(`${SUPABASE_URL}/rest/v1/daily_production?select=*&limit=10000`, { headers: restHeaders }),
+                fetch(`${SUPABASE_URL}/rest/v1/work_items?select=id_work,work_code&limit=10000`, { headers: restHeaders }),
+                fetch(`${SUPABASE_URL}/rest/v1/employees?select=id_name,name&limit=10000`, { headers: restHeaders })
             ]);
 
             ordersCache = await ordersRes.json();
@@ -462,88 +473,110 @@
                 }
             });
 
-            let today = new Date();
-            today.setHours(0,0,0,0);
-
-            rawData = [];
-            
-            orderStepsCache.forEach(os => {
-                let order = ordersCache.find(o => o.id_order === os.id_order);
-                if(!order) return; 
-                
-                let step = stepsCache.find(s => s.id_step === os.id_step);
-                let target = targetsCache.find(t => t.id_step === os.id_step && t.id_work === order.id_work);
-                
-                let workItem = workItemsCache.find(w => w.id_work === order.id_work);
-                let workCodeText = workItem ? workItem.work_code : "ไม่ระบุ";
-
-                let totalProd = 0;
-                if (target) {
-                    allDailyProductions.forEach(p => {
-                        if(p.id_order === os.id_order && p.id_target === target.id_target) {
-                            totalProd += (p.produced_amount || 0);
-                        }
-                    });
-                }
-
-                let qty = parseInt(order.quantity) || 0;
-                let percent = qty > 0 ? (totalProd / qty) * 100 : 0;
-
-                let diffDays = 0;
-                let statusCat = "NONE"; 
-                let statusText = '<span class="status-gray">ไม่มีกำหนดเสร็จ</span>';
-                let rawEndDate = os.end_date ? new Date(os.end_date).getTime() : 9999999999999;
-                
-                if (os.end_date) {
-                    let ed = new Date(os.end_date); ed.setHours(0,0,0,0);
-                    let diffTime = ed.getTime() - today.getTime();
-                    diffDays = Math.ceil(diffTime / (1000*60*60*24));
-
-                    if (diffDays < 0) { 
-                        statusCat = "RED"; 
-                        statusText = '<span class="status-red"><i class="fa-solid fa-circle-exclamation"></i> เลยกำหนด ' + Math.abs(diffDays) + ' วัน</span>'; 
-                    }
-                    else if (diffDays > 0) { 
-                        statusCat = "GREEN"; 
-                        statusText = '<span class="status-green"><i class="fa-regular fa-clock"></i> เหลือเวลา ' + diffDays + ' วัน</span>'; 
-                    }
-                    else { 
-                        statusCat = "ORANGE"; 
-                        statusText = '<span class="status-orange"><i class="fa-solid fa-bell"></i> ครบกำหนดวันนี้!</span>'; 
-                    }
-                }
-
-                let uniqueRowId = order.id_order + '_' + (step ? step.id_step : 'no_step');
-                let foundShortcut = shortcutMap.find(s => String(s.id_order) === String(order.id_order) && String(s.id_step) === String(step ? step.id_step : ''));
-                let code5 = foundShortcut ? foundShortcut.code5 : String(order.id_order).padStart(5, '0');
-
-                rawData.push({
-                    uniqueId: uniqueRowId,
-                    code5: code5,
-                    id_order: order.id_order,
-                    id_step: step ? step.id_step : null,
-                    targetId: target ? target.id_target : null,
-                    orderNo: order.order_no || "-",
-                    poNo: order.po_no || "-",
-                    workCode: workCodeText,
-                    stepName: step ? step.step_name : "-",
-                    qty: qty,
-                    produced: totalProd,
-                    percent: percent,
-                    statusCat: statusCat,
-                    statusText: statusText,
-                    rawEndDate: rawEndDate,
-                    endDateStr: os.end_date || "-",
-                    startDateStr: os.start_date || order.start_date || "-"
-                });
-            });
-
-            applyFilters();
+            buildRawDataAndRender();
+            setupRealtimeSubscription(); // เปิดช่องฟังการเปลี่ยนแปลงข้อมูลแบบ Real-time
 
         } catch (error) {
             console.error("Fetch Error:", error);
             document.getElementById('tableBody').innerHTML = '<tr><td colspan="10" class="status-red" style="text-align: center; padding: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> ไม่สามารถเชื่อมต่อฐานข้อมูลได้</td></tr>';
         }
+    }
+
+    // ฟังก์ชันสร้างและคำนวณข้อมูลดิบใหม่เมื่อมีข้อมูลยอดผลิตเปลี่ยนแปลง
+    function buildRawDataAndRender() {
+        let today = new Date();
+        today.setHours(0,0,0,0);
+
+        rawData = [];
+        
+        orderStepsCache.forEach(os => {
+            let order = ordersCache.find(o => o.id_order === os.id_order);
+            if(!order) return; 
+            
+            let step = stepsCache.find(s => s.id_step === os.id_step);
+            let target = targetsCache.find(t => t.id_step === os.id_step && t.id_work === order.id_work);
+            
+            let workItem = workItemsCache.find(w => w.id_work === order.id_work);
+            let workCodeText = workItem ? workItem.work_code : "ไม่ระบุ";
+
+            let totalProd = 0;
+            if (target) {
+                allDailyProductions.forEach(p => {
+                    if(p.id_order === os.id_order && p.id_target === target.id_target) {
+                        totalProd += (p.produced_amount || 0);
+                    }
+                });
+            }
+
+            let qty = parseInt(order.quantity) || 0;
+            let percent = qty > 0 ? (totalProd / qty) * 100 : 0;
+
+            let diffDays = 0;
+            let statusCat = "NONE"; 
+            let statusText = '<span class="status-gray">ไม่มีกำหนดเสร็จ</span>';
+            let rawEndDate = os.end_date ? new Date(os.end_date).getTime() : 9999999999999;
+            
+            if (os.end_date) {
+                let ed = new Date(os.end_date); ed.setHours(0,0,0,0);
+                let diffTime = ed.getTime() - today.getTime();
+                diffDays = Math.ceil(diffTime / (1000*60*60*24));
+
+                if (diffDays < 0) { 
+                    statusCat = "RED"; 
+                    statusText = '<span class="status-red"><i class="fa-solid fa-circle-exclamation"></i> เลยกำหนด ' + Math.abs(diffDays) + ' วัน</span>'; 
+                }
+                else if (diffDays > 0) { 
+                    statusCat = "GREEN"; 
+                    statusText = '<span class="status-green"><i class="fa-regular fa-clock"></i> เหลือเวลา ' + diffDays + ' วัน</span>'; 
+                }
+                else { 
+                    statusCat = "ORANGE"; 
+                    statusText = '<span class="status-orange"><i class="fa-solid fa-bell"></i> ครบกำหนดวันนี้!</span>'; 
+                }
+            }
+
+            let uniqueRowId = order.id_order + '_' + (step ? step.id_step : 'no_step');
+            let foundShortcut = shortcutMap.find(s => String(s.id_order) === String(order.id_order) && String(s.id_step) === String(step ? step.id_step : ''));
+            let code5 = foundShortcut ? foundShortcut.code5 : String(order.id_order).padStart(5, '0');
+
+            rawData.push({
+                uniqueId: uniqueRowId,
+                code5: code5,
+                id_order: order.id_order,
+                id_step: step ? step.id_step : null,
+                targetId: target ? target.id_target : null,
+                orderNo: order.order_no || "-",
+                poNo: order.po_no || "-",
+                workCode: workCodeText,
+                stepName: step ? step.step_name : "-",
+                qty: qty,
+                produced: totalProd,
+                percent: percent,
+                statusCat: statusCat,
+                statusText: statusText,
+                rawEndDate: rawEndDate,
+                endDateStr: os.end_date || "-",
+                startDateStr: os.start_date || order.start_date || "-"
+            });
+        });
+
+        applyFilters();
+    }
+
+    // ตั้งค่า Supabase Realtime ฟังการเปลี่ยนแปลงตาราง daily_production โดยไม่ต้องโหลดหน้าใหม่
+    function setupRealtimeSubscription() {
+        supabaseClient
+            .channel('public:daily_production')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_production' }, async (payload) => {
+                console.log('⚡ Real-time update detected:', payload);
+                // ดึงข้อมูลยอดผลิตใหม่เฉพาะเมื่อมีการเปลี่ยนแปลง เพื่อประหยัดโควต้า
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/daily_production?select=*&limit=10000`, { headers: restHeaders });
+                if (res.ok) {
+                    allDailyProductions = await res.json();
+                    buildRawDataAndRender(); // คำนวณยอดและเรนเดอร์หน้าจอใหม่ทันที
+                }
+            })
+            .subscribe();
     }
 
     function getHiddenRows() {
@@ -788,7 +821,6 @@
             }
         }
 
-        // ลิงก์ปลายทางไปที่ Fast Form พร้อมส่งค่ารหัส 5 หลัก (code5) ผ่าน URL parameter
         const fastFormUrl = `https://paiboon-creater.github.io/fast_form_daily/?code5=${encodeURIComponent(cardItem.code5)}`;
 
         return `
@@ -848,7 +880,6 @@
 
             document.getElementById('meterModalBody').innerHTML = docHtml;
 
-            // สร้าง QR Code ให้มีความคมชัดสูงและสแกนง่ายขึ้น
             setTimeout(() => {
                 document.querySelectorAll('.modalQrCodeContainer').forEach(qrEl => {
                     qrEl.innerHTML = "";
