@@ -6,9 +6,7 @@
     <title>JAGUAR_PRODUCTION - ALL DATA SUMMARY</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- โหลดไลบรารีสำหรับสร้าง QR Code ตอนพรีวิวพิมพ์ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- โหลด Supabase JS Client เพื่อใช้ Realtime -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -168,29 +166,30 @@
             padding: 20px; box-shadow: 0 4px 25px rgba(0,0,0,0.2);
             display: flex; flex-direction: column; gap: 15px; max-height: 95vh;
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
-        .modal-header h3 { font-size: 1.1rem; color: #1e293b; font-weight: 600; }
-        .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #64748b; }
-        .modal-body { overflow-y: auto; max-height: 78vh; padding-right: 5px; }
+        .modal-header { display: flex; justify-content: flex-end; align-items: center; border-bottom: none; padding-bottom: 0; }
+        .modal-close { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #64748b; }
+        .modal-body { overflow-y: auto; max-height: 80vh; padding-right: 5px; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #dee2e6; padding-top: 10px; }
 
-        /* ดีไซน์กระดาษเอกสารพรีวิวคู่ (A4 แนวนอน) */
+        /* ดีไซน์กระดาษ A4 แนวนอน (วางซ้าย ฝั่งขวาว่างไว้) */
         .doc-sheet {
-            background: #fff; padding: 5px; font-family: 'Prompt', sans-serif; color: #000;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;
+            background: #fff; padding: 10px; font-family: 'Prompt', sans-serif; color: #000;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; max-width: 1350px; margin: 0 auto;
         }
         .print-card {
             border: 2px solid #000; padding: 15px; background: #fff;
             display: flex; flex-direction: column; justify-content: space-between; width: 100%; box-sizing: border-box;
         }
         .print-header-top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
-        .print-title-area h3 { margin: 0 0 8px 0; font-size: 1.1rem; text-align: center; font-weight: bold; text-decoration: underline; }
-        .print-meta-row { font-size: 0.8rem; margin-bottom: 4px; display: flex; align-items: flex-end; gap: 6px; font-weight: bold; }
-        .print-label { white-space: nowrap; margin-bottom: -1px; }
-        .print-value { border-bottom: 1px dotted #000; padding-left: 6px; min-height: 18px; flex: 1; }
+        .print-title-area h3 { margin: 0 0 6px 0; font-size: 1.1rem; text-align: center; font-weight: bold; text-decoration: underline; }
         
-        .print-qr-box { text-align: center; border: 2px solid #000; padding: 6px; background: #fff; min-width: 95px; margin-left: 8px; }
-        .print-qr-box canvas, .print-qr-box img { width: 75px !important; height: 75px !important; display: block; margin: 0 auto; image-rendering: pixelated; }
+        .print-meta-row { font-size: 0.8rem; margin-bottom: 4px; display: flex; align-items: flex-end; gap: 6px; font-weight: bold; white-space: nowrap; }
+        .print-label { white-space: nowrap; margin-bottom: -1px; }
+        .print-value { border-bottom: 1px dotted #000; padding-left: 6px; min-height: 18px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* ขยายกล่องและขนาด QR Code ให้สแกนง่ายขึ้น */
+        .print-qr-box { text-align: center; border: 2px solid #000; padding: 6px; background: #fff; min-width: 110px; margin-left: 8px; }
+        .print-qr-box canvas, .print-qr-box img { width: 90px !important; height: 90px !important; display: block; margin: 0 auto; image-rendering: pixelated; }
         .print-qr-box span { display: block; font-size: 0.65rem; margin-top: 3px; font-weight: bold; }
         .print-code-link { 
             display: block; font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; margin-top: 4px; 
@@ -198,10 +197,9 @@
         }
         .print-code-link:hover { background: #333; }
         
-        /* ขยายความกว้างคอลัมน์ 1 และ 2 ให้เต็มพื้นที่ ไม่ตัดข้อความ และเอาหัวกระดาษตารางออกเกลี้ยง */
         .print-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin-bottom: 8px; table-layout: fixed; }
         .print-table th, .print-table td { border: 1px solid #000; padding: 4px 2px; text-align: center; overflow: hidden; text-overflow: clip; white-space: nowrap; }
-        .print-table th { background-color: #f1f5f9; font-weight: bold; }
+        .print-table th { background-color: #f1f5f9; font-weight: bold; font-size: 0.68rem; }
         .print-table tbody tr { height: 22px; }
         .print-footer { display: flex; justify-content: space-between; font-size: 0.7rem; border-top: 1.5px solid #000; padding-top: 4px; font-weight: bold; }
 
@@ -218,13 +216,13 @@
             #meterModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #fff; padding: 0; }
             .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; padding: 0 !important; }
             .modal-header, .modal-footer { display: none !important; }
-            .doc-sheet { border: none !important; padding: 0 !important; width: 100% !important; height: 100% !important; gap: 10mm !important; }
+            .doc-sheet { border: none !important; padding: 0 !important; width: 100% !important; height: 100% !important; }
 
             #guideModal, #guideModal * { visibility: visible; }
             #guideModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #fff; padding: 0; }
             #guideModal .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; }
             #guideModal .modal-header, #guideModal .modal-footer { display: none !important; }
-            @page { size: A4 portrait; margin: 15mm; }
+            @page { size: A4 landscape; margin: 10mm; }
         }
     </style>
 </head>
@@ -252,7 +250,7 @@
     <div class="table-container">
         <div class="header-title">
             <h1>สรุปงานผลิตทั้งหมดในระบบ <span class="realtime-badge"><span class="realtime-dot"></span> Real-time Active</span></h1>
-            <p>คลิกที่แถวรายการเพื่อดูพรีวิว "ใบความก้าวหน้าของการผลิต" (คู่ซ้าย-ขวา A4 แนวนอน)</p>
+            <p>คลิกที่แถวรายการเพื่อดูใบความก้าวหน้าของการผลิต</p>
         </div>
 
         <table>
@@ -388,10 +386,9 @@
     <div id="guideModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 900px;">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-book-open"></i> คู่มือการใช้งานระบบสรุปงานผลิต (JAGUAR_PRODUCTION)</h3>
                 <button class="modal-close" onclick="closeGuideModal()">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="display: block;">
                 <div class="guide-content">
                     <h2>📖 คู่มือการใช้งานระบบติดตามและสรุปยอดผลิต</h2>
                     
@@ -406,7 +403,7 @@
 
                     <h3>3. การพรีวิวและพิมพ์ใบความก้าวหน้าของการผลิต</h3>
                     <div class="guide-box">
-                        <p>• คลิกที่แถวรายการงานผลิตใดๆ ในตาราง ระบบจะเปิดหน้าต่างพรีวิว <strong>"ใบความก้าวหน้าของการผลิต"</strong> แบบฟอร์มคู่ (ซ้าย-ขวา) บนกระดาษ A4 แนวนอน</p>
+                        <p>• คลิกที่แถวรายการงานผลิตใดๆ ในตาราง ระบบจะเปิดหน้าต่างพรีวิว <strong>"ใบความก้าวหน้าของการผลิต"</strong> บนกระดาษ A4 แนวนอน</p>
                         <p>• สามารถสแกน QR Code เพื่อเปิดลิงก์ไปยังหน้าบันทึกด่วน (Fast Form) ได้ทันที</p>
                         <p>• กดปุ่ม <strong>"พิมพ์เอกสาร"</strong> ในหน้าต่างพรีวิวเพื่อปริ้นท์เอกสารออกมาใช้งานจริง</p>
                     </div>
@@ -426,11 +423,10 @@
         </div>
     </div>
 
-    <!-- Modal พรีวิวใบความก้าวหน้าของการผลิต -->
+    <!-- Modal พรีวิวใบความก้าวหน้าของการผลิต (ฝั่งซ้าย ฝั่งขวาว่างไว้) -->
     <div id="meterModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-file-invoice"></i> พรีวิวเอกสารคู่ (ซ้าย-ขวา A4 แนวนอน)</h3>
                 <button class="modal-close" onclick="closeMeterModal()">&times;</button>
             </div>
             <div class="modal-body" id="meterModalBody">
@@ -445,12 +441,11 @@
 
     <!-- Modal สร้างรายงาน -->
     <div id="reportModal" class="modal-overlay">
-        <div class="modal-box">
+        <div class="modal-box" style="max-width: 900px;">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-file-lines"></i> สรุปรายงานติดตามงาน (ตามตัวกรองปัจจุบัน)</h3>
                 <button class="modal-close" onclick="closeReportModal()">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="display: block;">
                 <textarea id="reportTextContent" readonly style="width: 100%; height: 250px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: 'Prompt', sans-serif; font-size: 0.85rem; resize: none;"></textarea>
             </div>
             <div class="modal-footer">
@@ -824,9 +819,7 @@
     }
 
     function getCardHtml(cardItem) {
-        if (!cardItem) {
-            return `<div class="print-card" style="visibility: hidden;"></div>`;
-        }
+        if (!cardItem) return "";
 
         let matchingLogs = allDailyProductions.filter(p => {
             if (String(p.id_order) !== String(cardItem.id_order)) return false;
@@ -839,9 +832,9 @@
 
         let cumulativeSum = 0;
         let rowsHtml = "";
-        const maxRows = 20;
+        let totalRowsToDisplay = Math.max(20, matchingLogs.length);
 
-        for (let i = 0; i < maxRows; i++) {
+        for (let i = 0; i < totalRowsToDisplay; i++) {
             if (i < matchingLogs.length) {
                 let log = matchingLogs[i];
                 let amount = log.produced_amount || 0;
@@ -851,18 +844,17 @@
                 let noGoods = log.nogoods_amount ? log.nogoods_amount : "";
                 let hours = log.hour_work !== undefined && log.hour_work !== null ? Number(log.hour_work).toFixed(2) : "-";
                 let remark = log.remark || "";
-                let smallNum = log.id_target || "";
 
                 rowsHtml += `
                     <tr>
                         <td>${recordDate}</td>
-                        <td>${smallNum}</td>
+                        <td></td>
                         <td>${amount.toLocaleString()}</td>
                         <td style="font-weight: bold;">${cumulativeSum.toLocaleString()}</td>
                         <td>${noGoods}</td>
                         <td>${hours}</td>
                         <td style="text-align: left; padding-left: 4px;">${empName}</td>
-                        <td>${remark}</td>
+                        <td style="text-align: left; padding-left: 4px; overflow: hidden; text-overflow: ellipsis;">${remark}</td>
                     </tr>
                 `;
             } else {
@@ -903,14 +895,14 @@
                 <table class="print-table">
                     <thead>
                         <tr>
-                            <th width="14%">วันที่</th>
-                            <th width="13%">ตัวเลขตอนเลิกงาน</th>
-                            <th width="12%">ผลิตได้/วัน</th>
-                            <th width="12%">สะสม</th>
+                            <th width="12%">วันที่</th>
+                            <th width="12%">ตัวเลขตอนเลิกงาน</th>
+                            <th width="11%">ผลิตได้/วัน</th>
+                            <th width="11%">สะสม</th>
                             <th width="7%">เสีย</th>
-                            <th width="9%">ชั่วโมง</th>
-                            <th width="21%">ชื่อคนทำ</th>
-                            <th width="12%">หมายเหตุ</th>
+                            <th width="8%">ชั่วโมง</th>
+                            <th width="19%">ชื่อคนทำ</th>
+                            <th width="20%">หมายเหตุ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -923,18 +915,14 @@
     }
 
     function openMeterModal(item) {
-        document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> กำลังโหลดแบบฟอร์มเอกสารคู่...</p>';
+        document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">กำลังโหลดข้อมูล...</p>';
         document.getElementById('meterModal').style.display = 'flex';
 
         try {
-            let sameOrderItems = rawData.filter(d => String(d.id_order) === String(item.id_order));
-            let currentIndex = sameOrderItems.findIndex(d => String(d.uniqueId) === String(item.uniqueId));
-            let nextItem = (currentIndex !== -1 && currentIndex + 1 < sameOrderItems.length) ? sameOrderItems[currentIndex + 1] : null;
-
             let docHtml = `
                 <div class="doc-sheet">
                     ${getCardHtml(item)}
-                    ${getCardHtml(nextItem)}
+                    <div style="visibility: hidden;"></div>
                 </div>
             `;
 
@@ -945,8 +933,8 @@
                     qrEl.innerHTML = "";
                     new QRCode(qrEl, {
                         text: qrEl.getAttribute('data-url'),
-                        width: 75,
-                        height: 75,
+                        width: 90,
+                        height: 90,
                         colorDark: "#000000",
                         colorLight: "#ffffff",
                         correctLevel: QRCode.CorrectLevel.H
@@ -956,7 +944,7 @@
 
         } catch (err) {
             console.error("Error generating doc preview:", err);
-            document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #dc2626; padding: 20px;">เกิดข้อผิดพลาดในการสร้างพรีวิวเอกสารคู่</p>';
+            document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #dc2626; padding: 20px;">เกิดข้อผิดพลาดในการสร้างพรีวิวเอกสาร</p>';
         }
     }
 
