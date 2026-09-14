@@ -152,48 +152,57 @@
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
         }
         .modal-box {
-            background: #fff; width: 95%; max-width: 850px; border-radius: 8px;
-            padding: 25px; box-shadow: 0 4px 25px rgba(0,0,0,0.2);
-            display: flex; flex-direction: column; gap: 15px; max-height: 90vh;
+            background: #fff; width: 98%; max-width: 1450px; border-radius: 8px;
+            padding: 20px; box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; gap: 15px; max-height: 95vh;
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dee2e6; padding-bottom: 12px; }
-        .modal-header h3 { font-size: 1.2rem; color: #1e293b; font-weight: 600; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+        .modal-header h3 { font-size: 1.1rem; color: #1e293b; font-weight: 600; }
         .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #64748b; }
-        .modal-body { overflow-y: auto; max-height: 70vh; padding-right: 5px; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #dee2e6; padding-top: 12px; }
+        .modal-body { overflow-y: auto; max-height: 78vh; padding-right: 5px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #dee2e6; padding-top: 10px; }
 
-        /* ดีไซน์กระดาษเอกสารพรีวิว */
+        /* ดีไซน์กระดาษเอกสารพรีวิวคู่ (A4 แนวนอน - ซ้าย/ขวาเต็มสัดส่วน) */
         .doc-sheet {
-            background: #fff; border: 2px solid #212529; padding: 25px; font-family: 'Prompt', sans-serif; color: #000;
+            background: #fff; padding: 5px; font-family: 'Prompt', sans-serif; color: #000;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;
         }
-        .doc-title { text-align: center; font-size: 1.4rem; font-weight: bold; margin-bottom: 20px; text-decoration: underline; }
-        .doc-header-grid { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 2px solid #212529; padding-bottom: 15px; }
-        .doc-info-left { display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; flex-grow: 1; }
-        .doc-info-row { display: flex; align-items: baseline; gap: 10px; }
-        .doc-info-row span.label { font-weight: 600; min-width: 140px; }
-        .doc-info-row span.value { border-bottom: 1px dotted #000; flex-grow: 1; padding-bottom: 2px; }
+        .print-card {
+            border: 2px solid #000; padding: 15px; background: #fff;
+            display: flex; flex-direction: column; justify-content: space-between; width: 100%; box-sizing: border-box;
+        }
+        .print-header-top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
+        .print-title-area h3 { margin: 0 0 8px 0; font-size: 1.1rem; text-align: center; font-weight: bold; text-decoration: underline; }
+        .print-meta-row { font-size: 0.8rem; margin-bottom: 4px; display: flex; align-items: flex-end; gap: 6px; font-weight: bold; }
+        .print-label { white-space: nowrap; margin-bottom: -1px; }
+        .print-value { border-bottom: 1px dotted #000; padding-left: 6px; min-height: 18px; flex: 1; }
         
-        .doc-qr-box {
-            border: 2px solid #000; padding: 8px; text-align: center; background: #fff; min-width: 130px; margin-left: 20px;
+        /* ปรับแต่งกล่อง QR Code ให้สแกนง่ายยิ่งขึ้น */
+        .print-qr-box { text-align: center; border: 2px solid #000; padding: 6px; background: #fff; min-width: 95px; margin-left: 8px; }
+        .print-qr-box canvas, .print-qr-box img { width: 75px !important; height: 75px !important; display: block; margin: 0 auto; image-rendering: pixelated; }
+        .print-qr-box span { display: block; font-size: 0.65rem; margin-top: 3px; font-weight: bold; }
+        .print-code-link { 
+            display: block; font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; margin-top: 4px; 
+            background: #000; color: #fff; border: 1px solid #000; padding: 2px 4px; text-decoration: none; cursor: pointer;
         }
-        .doc-qr-box canvas, .doc-qr-box img { width: 90px !important; height: 90px !important; display: block; margin: 0 auto 5px auto; }
-        .doc-qr-box .qr-code-label { font-size: 0.75rem; margin-bottom: 3px; }
-        .doc-qr-box .code5-box { border: 2px solid #000; padding: 3px; font-weight: bold; font-size: 1rem; background: #eee; letter-spacing: 1px; }
+        .print-code-link:hover { background: #333; }
+        
+        .print-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-bottom: 8px; table-layout: fixed; }
+        .print-table th, .print-table td { border: 1px solid #000; padding: 4px 4px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .print-table th { background-color: #f1f5f9; font-weight: bold; }
+        .print-table tbody tr { height: 22px; }
 
-        .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .doc-table th, .doc-table td { border: 1px solid #000; padding: 6px 8px; font-size: 0.82rem; text-align: center; }
-        .doc-table th { background-color: #f8f9fa; font-weight: 600; }
-        .doc-table td:nth-child(3), .doc-table td:nth-child(4) { text-align: right; }
+        .print-footer { display: flex; justify-content: space-between; font-size: 0.7rem; border-top: 1.5px solid #000; padding-top: 4px; font-weight: bold; }
 
-        /* สำหรับสั่งพิมพ์ (Print) */
+        /* สำหรับสั่งพิมพ์ A4 แนวนอน (Landscape) */
         @media print {
             body * { visibility: hidden; }
             #meterModal, #meterModal * { visibility: visible; }
             #meterModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #fff; padding: 0; }
-            .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; padding: 10px !important; }
+            .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; padding: 0 !important; }
             .modal-header, .modal-footer { display: none !important; }
-            .doc-sheet { border: none !important; padding: 0 !important; }
-            @page { size: A4 portrait; margin: 10mm; }
+            .doc-sheet { border: none !important; padding: 0 !important; width: 100% !important; height: 100% !important; gap: 10mm !important; }
+            @page { size: A4 landscape; margin: 5mm; }
         }
     </style>
 </head>
@@ -216,7 +225,7 @@
     <div class="table-container">
         <div class="header-title">
             <h1>สรุปงานผลิตทั้งหมดในระบบ</h1>
-            <p>คลิกที่แถวรายการเพื่อดูพรีวิว "ใบความก้าวหน้าของการผลิต"</p>
+            <p>คลิกที่แถวรายการเพื่อดูพรีวิว "ใบความก้าวหน้าของการผลิต" (คู่ซ้าย-ขวา A4 แนวนอน)</p>
         </div>
 
         <table>
@@ -351,7 +360,7 @@
     <div id="meterModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-file-invoice"></i> พรีวิวเอกสารใบความก้าวหน้าของการผลิต</h3>
+                <h3><i class="fa-solid fa-file-invoice"></i> พรีวิวเอกสารคู่ (ซ้าย-ขวา A4 แนวนอน)</h3>
                 <button class="modal-close" onclick="closeMeterModal()">&times;</button>
             </div>
             <div class="modal-body" id="meterModalBody">
@@ -394,6 +403,11 @@
     let targetsMap = {};
     let employeesMap = {};
     let shortcutMap = [];
+    let ordersCache = [];
+    let targetsCache = [];
+    let stepsCache = [];
+    let orderStepsCache = [];
+    let workItemsCache = [];
     let currentPage = 1;
     const rowsPerPage = 20;
     
@@ -411,30 +425,29 @@
                 fetch(`${SUPABASE_URL}/employees?select=id_name,name&limit=10000`, { headers })
             ]);
 
-            const orders = await ordersRes.json();
-            const targets = await targetsRes.json();
-            const steps = await stepsRes.json();
-            const orderSteps = await orderStepsRes.json();
+            ordersCache = await ordersRes.json();
+            targetsCache = await targetsRes.json();
+            stepsCache = await stepsRes.json();
+            orderStepsCache = await orderStepsRes.json();
             allDailyProductions = await allProdRes.json();
-            const workItems = await workItemsRes.json();
+            workItemsCache = await workItemsRes.json();
             const employees = await employeesRes.json();
 
             employees.forEach(e => { employeesMap[e.id_name] = e.name; });
 
-            targets.forEach(t => {
-                let step = steps.find(s => s.id_step === t.id_step);
+            targetsCache.forEach(t => {
+                let step = stepsCache.find(s => s.id_step === t.id_step);
                 targetsMap[t.id_target] = {
                     id_step: t.id_step,
                     step_name: step ? step.step_name : "-"
                 };
             });
 
-            // สร้าง shortcutMap 5 หลัก (ตามรูปแบบโค้ดเดิมของคุณไพบูลย์: 3 ตัวแรกเลขออร์เดอร์ + 2 ตัวหลังลำดับขั้นตอน)
             shortcutMap = [];
-            let sortedOrders = [...orders].sort((a,b) => parseInt(a.id_order) - parseInt(b.id_order));
+            let sortedOrders = [...ordersCache].sort((a,b) => parseInt(a.id_order) - parseInt(b.id_order));
             sortedOrders.forEach(order => {
                 if (order.id_work) {
-                    let orderTargets = targets.filter(t => String(t.id_work) === String(order.id_work));
+                    let orderTargets = targetsCache.filter(t => String(t.id_work) === String(order.id_work));
                     orderTargets.sort((a,b) => parseInt(a.id_target) - parseInt(b.id_target));
                     orderTargets.forEach((target, index) => {
                         let orderPart = String(order.id_order).padStart(3, '0');
@@ -454,14 +467,14 @@
 
             rawData = [];
             
-            orderSteps.forEach(os => {
-                let order = orders.find(o => o.id_order === os.id_order);
+            orderStepsCache.forEach(os => {
+                let order = ordersCache.find(o => o.id_order === os.id_order);
                 if(!order) return; 
                 
-                let step = steps.find(s => s.id_step === os.id_step);
-                let target = targets.find(t => t.id_step === os.id_step && t.id_work === order.id_work);
+                let step = stepsCache.find(s => s.id_step === os.id_step);
+                let target = targetsCache.find(t => t.id_step === os.id_step && t.id_work === order.id_work);
                 
-                let workItem = workItems.find(w => w.id_work === order.id_work);
+                let workItem = workItemsCache.find(w => w.id_work === order.id_work);
                 let workCodeText = workItem ? workItem.work_code : "ไม่ระบุ";
 
                 let totalProd = 0;
@@ -501,8 +514,6 @@
                 }
 
                 let uniqueRowId = order.id_order + '_' + (step ? step.id_step : 'no_step');
-                
-                // หาค่ารหัส 5 หลักจาก shortcutMap
                 let foundShortcut = shortcutMap.find(s => String(s.id_order) === String(order.id_order) && String(s.id_step) === String(step ? step.id_step : ''));
                 let code5 = foundShortcut ? foundShortcut.code5 : String(order.id_order).padStart(5, '0');
 
@@ -719,141 +730,142 @@
         return `${day}/${month}/${year}`;
     }
 
+    function getCardHtml(cardItem) {
+        if (!cardItem) {
+            return `<div class="print-card" style="visibility: hidden;"></div>`;
+        }
+
+        let matchingLogs = allDailyProductions.filter(p => {
+            if (String(p.id_order) !== String(cardItem.id_order)) return false;
+            if (cardItem.targetId) {
+                return String(p.id_target) === String(cardItem.targetId);
+            }
+            let targetInfo = targetsMap[p.id_target];
+            return targetInfo && String(targetInfo.id_step) === String(cardItem.id_step);
+        });
+
+        let cumulativeSum = 0;
+        let rowsHtml = "";
+        const maxRows = 20;
+
+        for (let i = 0; i < maxRows; i++) {
+            if (i < matchingLogs.length) {
+                let log = matchingLogs[i];
+                let amount = log.produced_amount || 0;
+                cumulativeSum += amount;
+                let recordDate = formatDateThai(log.record_date);
+                let empName = employeesMap[log.id_name] || "-";
+                let noGoods = log.nogoods_amount ? log.nogoods_amount : "";
+                let hours = log.hour_work !== undefined && log.hour_work !== null ? Number(log.hour_work).toFixed(2) : "-";
+                let remark = log.remark || "";
+                let smallNum = log.id_target || "";
+
+                rowsHtml += `
+                    <tr>
+                        <td>${recordDate}</td>
+                        <td>${smallNum}</td>
+                        <td>${amount.toLocaleString()}</td>
+                        <td style="font-weight: bold;">${cumulativeSum.toLocaleString()}</td>
+                        <td>${noGoods}</td>
+                        <td>${hours}</td>
+                        <td style="text-align: left; padding-left: 4px;">${empName}</td>
+                        <td>${remark}</td>
+                    </tr>
+                `;
+            } else {
+                rowsHtml += `
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                `;
+            }
+        }
+
+        // ลิงก์ปลายทางไปที่ Fast Form พร้อมส่งค่ารหัส 5 หลัก (code5) ผ่าน URL parameter
+        const fastFormUrl = `https://paiboon-creater.github.io/fast_form_daily/?code5=${encodeURIComponent(cardItem.code5)}`;
+
+        return `
+            <div class="print-card">
+                <div class="print-header-top">
+                    <div style="flex-grow: 1; overflow: hidden; padding-right: 8px;">
+                        <div class="print-title-area"><h3>ใบความก้าวหน้าของการผลิต</h3></div>
+                        <div class="print-meta-row"><span class="print-label">ใบสั่งงานเลขที่:</span><span class="print-value" style="color: #0284c7;">${cardItem.orderNo}</span><span class="print-label" style="margin-left: 8px;">ขั้นตอนงาน:</span><span class="print-value" style="color: #7c3aed;">${cardItem.stepName}</span></div>
+                        <div class="print-meta-row"><span class="print-label">ชนิดงาน:</span> <span class="print-value">${cardItem.workCode}</span></div>
+                        <div class="print-meta-row"><span class="print-label">จำนวนชิ้นงานสั่งผลิต:</span> <span class="print-value">${cardItem.qty.toLocaleString()} ชิ้น</span></div>
+                        <div class="print-meta-row"><span class="print-label">วันที่เริ่ม:</span> <span class="print-value">${formatDateThai(cardItem.startDateStr)}</span><span class="print-label" style="margin-left: 8px;">วันที่เสร็จ:</span> <span class="print-value">${formatDateThai(cardItem.endDateStr)}</span></div>
+                    </div>
+                    <div class="print-qr-box">
+                        <div class="modalQrCodeContainer" data-url="${fastFormUrl}"></div>
+                        <span>สแกนเข้า Fast Form</span>
+                        <a href="${fastFormUrl}" target="_blank" class="print-code-link">[ ${cardItem.code5} ]</a>
+                    </div>
+                </div>
+
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th width="11%">วันที่</th>
+                            <th width="10%">ตัวเลขตอนเลิกงาน</th>
+                            <th width="12%">ผลิตได้/วัน</th>
+                            <th width="12%">สะสม</th>
+                            <th width="8%">เสีย</th>
+                            <th width="10%">ชั่วโมง</th>
+                            <th width="22%">ชื่อคนทำ</th>
+                            <th width="15%">หมายเหตุ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+                <div class="print-footer"><span>F-PR-005-00</span><span>DAILY PRODUCTION TRACKER</span></div>
+            </div>
+        `;
+    }
+
     function openMeterModal(item) {
-        document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> กำลังโหลดแบบฟอร์มเอกสาร...</p>';
+        document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> กำลังโหลดแบบฟอร์มเอกสารคู่...</p>';
         document.getElementById('meterModal').style.display = 'flex';
 
         try {
-            let matchingLogs = allDailyProductions.filter(p => {
-                if (String(p.id_order) !== String(item.id_order)) return false;
-                if (item.targetId) {
-                    return String(p.id_target) === String(item.targetId);
-                }
-                let targetInfo = targetsMap[p.id_target];
-                return targetInfo && String(targetInfo.id_step) === String(item.id_step);
-            });
-
-            let cumulativeSum = 0;
-            let rowsHtml = "";
-            const maxRows = 25;
-
-            for (let i = 0; i < maxRows; i++) {
-                if (i < matchingLogs.length) {
-                    let log = matchingLogs[i];
-                    let amount = log.produced_amount || 0;
-                    cumulativeSum += amount;
-                    let recordDate = formatDateThai(log.record_date);
-                    let empName = employeesMap[log.id_name] || "-";
-                    let noGoods = log.nogoods_amount ? log.nogoods_amount : "";
-                    let hours = log.hour_work !== undefined && log.hour_work !== null ? Number(log.hour_work).toFixed(2) : "-";
-                    let remark = log.remark || "";
-                    let smallNum = log.id_target || "";
-
-                    rowsHtml += `
-                        <tr>
-                            <td>${recordDate}</td>
-                            <td>${smallNum}</td>
-                            <td>${amount.toLocaleString()}</td>
-                            <td style="font-weight: bold;">${cumulativeSum.toLocaleString()}</td>
-                            <td>${noGoods}</td>
-                            <td>${hours}</td>
-                            <td style="text-align: left; padding-left: 6px;">${empName}</td>
-                            <td>${remark}</td>
-                        </tr>
-                    `;
-                } else {
-                    rowsHtml += `
-                        <tr>
-                            <td>&nbsp;</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    `;
-                }
-            }
-
-            const baseUrl = window.location.href.split('?')[0];
-            const currentUrl = `${baseUrl}?order_id=${encodeURIComponent(item.id_order)}&target_id=${encodeURIComponent(item.targetId || '')}`;
+            let sameOrderItems = rawData.filter(d => String(d.id_order) === String(item.id_order));
+            let currentIndex = sameOrderItems.findIndex(d => String(d.uniqueId) === String(item.uniqueId));
+            let nextItem = (currentIndex !== -1 && currentIndex + 1 < sameOrderItems.length) ? sameOrderItems[currentIndex + 1] : null;
 
             let docHtml = `
                 <div class="doc-sheet">
-                    <div class="doc-title">ใบความก้าวหน้าของการผลิต</div>
-                    <div class="doc-header-grid">
-                        <div class="doc-info-left">
-                            <div class="doc-info-row">
-                                <span class="label">ใบสั่งงานเลขที่:</span>
-                                <span class="value" style="font-weight: bold; color: #0284c7;">${item.orderNo}</span>
-                            </div>
-                            <div class="doc-info-row">
-                                <span class="label">ขั้นตอนงาน:</span>
-                                <span class="value" style="font-weight: bold; color: #7c3aed;">${item.stepName}</span>
-                            </div>
-                            <div class="doc-info-row">
-                                <span class="label">ชนิดงาน:</span>
-                                <span class="value" style="font-weight: bold;">${item.workCode}</span>
-                            </div>
-                            <div class="doc-info-row">
-                                <span class="label">จำนวนชิ้นงานสั่งผลิต:</span>
-                                <span class="value" style="font-weight: bold;">${item.qty.toLocaleString()} ชิ้น</span>
-                            </div>
-                            <div class="doc-info-row" style="margin-top: 5px;">
-                                <span class="label">วันที่เริ่ม: ${formatDateThai(item.startDateStr)}</span>
-                                <span class="label" style="min-width: unset; margin-left: 20px;">วันที่เสร็จ: ${formatDateThai(item.endDateStr)}</span>
-                            </div>
-                        </div>
-                        <div class="doc-qr-box">
-                            <div id="modalQrCodeContainer" data-url="${currentUrl}"></div>
-                            <div class="qr-code-label">สแกน / คีย์รหัส</div>
-                            <div class="code5-box">[ ${item.code5} ]</div>
-                        </div>
-                    </div>
-
-                    <table class="doc-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 11%;">วันที่</th>
-                                <th style="width: 10%;">ตัวเลขเล็กงาน</th>
-                                <th style="width: 12%;">ผลิตได้/วัน</th>
-                                <th style="width: 12%;">สะสม</th>
-                                <th style="width: 8%;">เสีย</th>
-                                <th style="width: 10%;">ชั่วโมง</th>
-                                <th style="width: 20%;">ชื่อคนทำ</th>
-                                <th style="width: 17%;">หมายเหตุ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml}
-                        </tbody>
-                    </table>
+                    ${getCardHtml(item)}
+                    ${getCardHtml(nextItem)}
                 </div>
             `;
 
             document.getElementById('meterModalBody').innerHTML = docHtml;
 
-            // สร้าง QR Code อัตโนมัติ
+            // สร้าง QR Code ให้มีความคมชัดสูงและสแกนง่ายขึ้น
             setTimeout(() => {
-                let qrEl = document.getElementById('modalQrCodeContainer');
-                if (qrEl) {
+                document.querySelectorAll('.modalQrCodeContainer').forEach(qrEl => {
                     qrEl.innerHTML = "";
                     new QRCode(qrEl, {
                         text: qrEl.getAttribute('data-url'),
-                        width: 90,
-                        height: 90,
+                        width: 75,
+                        height: 75,
                         colorDark: "#000000",
                         colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.M
+                        correctLevel: QRCode.CorrectLevel.H
                     });
-                }
+                });
             }, 100);
 
         } catch (err) {
             console.error("Error generating doc preview:", err);
-            document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #dc2626; padding: 20px;">เกิดข้อผิดพลาดในการสร้างพรีวิวเอกสาร</p>';
+            document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #dc2626; padding: 20px;">เกิดข้อผิดพลาดในการสร้างพรีวิวเอกสารคู่</p>';
         }
     }
 
