@@ -6,6 +6,8 @@
     <title>JAGUAR_PRODUCTION - ALL DATA SUMMARY</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- โหลดไลบรารีสำหรับสร้าง QR Code ตอนพรีวิวพิมพ์ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         :root {
@@ -115,6 +117,7 @@
             border-width: 0 2px 2px 0; transform: rotate(45deg);
         }
 
+        .col-code5 { color: #0284c7; font-weight: 600; font-family: monospace; }
         .col-order { color: #0284c7; font-weight: 600; }
         .col-po { color: #d97706; font-weight: 500; }
         .col-work { color: #334155; }
@@ -143,24 +146,55 @@
         .btn-page:hover:not(:disabled) { background: #f1f5f9; color: #1e293b; border-color: #94a3b8; }
         .btn-page:disabled { background: #f8f9fa; color: #adb5bd; border-color: #e9ecef; cursor: not-allowed; }
 
+        /* Modal พรีวิวใบความก้าวหน้าของการผลิต */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
         }
         .modal-box {
-            background: #fff; width: 90%; max-width: 750px; border-radius: 8px;
-            padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            display: flex; flex-direction: column; gap: 15px; max-height: 85vh;
+            background: #fff; width: 95%; max-width: 850px; border-radius: 8px;
+            padding: 25px; box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; gap: 15px; max-height: 90vh;
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 10px; }
-        .modal-header h3 { font-size: 1.1rem; color: #1e293b; }
-        .modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; }
-        .modal-body { overflow-y: auto; max-height: 60vh; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #dee2e6; padding-top: 10px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dee2e6; padding-bottom: 12px; }
+        .modal-header h3 { font-size: 1.2rem; color: #1e293b; font-weight: 600; }
+        .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #64748b; }
+        .modal-body { overflow-y: auto; max-height: 70vh; padding-right: 5px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #dee2e6; padding-top: 12px; }
+
+        /* ดีไซน์กระดาษเอกสารพรีวิว */
+        .doc-sheet {
+            background: #fff; border: 2px solid #212529; padding: 25px; font-family: 'Prompt', sans-serif; color: #000;
+        }
+        .doc-title { text-align: center; font-size: 1.4rem; font-weight: bold; margin-bottom: 20px; text-decoration: underline; }
+        .doc-header-grid { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 2px solid #212529; padding-bottom: 15px; }
+        .doc-info-left { display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; flex-grow: 1; }
+        .doc-info-row { display: flex; align-items: baseline; gap: 10px; }
+        .doc-info-row span.label { font-weight: 600; min-width: 140px; }
+        .doc-info-row span.value { border-bottom: 1px dotted #000; flex-grow: 1; padding-bottom: 2px; }
         
-        .meter-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .meter-table th, .meter-table td { border: 1px solid #dee2e6; padding: 8px; font-size: 0.8rem; text-align: left; }
-        .meter-table th { background-color: #f1f5f9; color: #334155; }
+        .doc-qr-box {
+            border: 2px solid #000; padding: 8px; text-align: center; background: #fff; min-width: 130px; margin-left: 20px;
+        }
+        .doc-qr-box canvas, .doc-qr-box img { width: 90px !important; height: 90px !important; display: block; margin: 0 auto 5px auto; }
+        .doc-qr-box .qr-code-label { font-size: 0.75rem; margin-bottom: 3px; }
+        .doc-qr-box .code5-box { border: 2px solid #000; padding: 3px; font-weight: bold; font-size: 1rem; background: #eee; letter-spacing: 1px; }
+
+        .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .doc-table th, .doc-table td { border: 1px solid #000; padding: 6px 8px; font-size: 0.82rem; text-align: center; }
+        .doc-table th { background-color: #f8f9fa; font-weight: 600; }
+        .doc-table td:nth-child(3), .doc-table td:nth-child(4) { text-align: right; }
+
+        /* สำหรับสั่งพิมพ์ (Print) */
+        @media print {
+            body * { visibility: hidden; }
+            #meterModal, #meterModal * { visibility: visible; }
+            #meterModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #fff; padding: 0; }
+            .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; padding: 10px !important; }
+            .modal-header, .modal-footer { display: none !important; }
+            .doc-sheet { border: none !important; padding: 0 !important; }
+            @page { size: A4 portrait; margin: 10mm; }
+        }
     </style>
 </head>
 <body>
@@ -182,12 +216,22 @@
     <div class="table-container">
         <div class="header-title">
             <h1>สรุปงานผลิตทั้งหมดในระบบ</h1>
-            <p>คลิกที่แถวรายการเพื่อตรวจสอบประวัติรายละเอียด "ใบมิเตอร์" รายวัน</p>
+            <p>คลิกที่แถวรายการเพื่อดูพรีวิว "ใบความก้าวหน้าของการผลิต"</p>
         </div>
 
         <table>
             <thead>
                 <tr>
+                    <th style="min-width: 90px;">
+                        <div class="th-content">
+                            <div class="th-title-row" onclick="sortBy('code5')">
+                                <span>รหัสค้นหา (5หลัก)</span>
+                                <i id="sort-code5" class="fa-solid fa-sort sort-icon"></i>
+                            </div>
+                            <input type="text" id="filterCode5" class="filter-input" placeholder="พิมพ์ค้นหา..." list="code5List" oninput="applyFilters()" onclick="event.stopPropagation()">
+                            <datalist id="code5List"></datalist>
+                        </div>
+                    </th>
                     <th>
                         <div class="th-content">
                             <div class="th-title-row" onclick="sortBy('orderNo')">
@@ -283,7 +327,7 @@
             </thead>
             <tbody id="tableBody">
                 <tr>
-                    <td colspan="9" class="loading-row">
+                    <td colspan="10" class="loading-row">
                         <i class="fa-solid fa-circle-notch fa-spin"></i> กำลังดึงข้อมูลทั้งหมด กรุณารอสักครู่...
                     </td>
                 </tr>
@@ -303,17 +347,18 @@
         </div>
     </div>
 
-    <!-- Modal รายละเอียดใบมิเตอร์ (Daily Production) -->
+    <!-- Modal พรีวิวใบความก้าวหน้าของการผลิต -->
     <div id="meterModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 id="meterModalTitle"><i class="fa-solid fa-clipboard-list"></i> ประวัติใบมิเตอร์รายวัน</h3>
+                <h3><i class="fa-solid fa-file-invoice"></i> พรีวิวเอกสารใบความก้าวหน้าของการผลิต</h3>
                 <button class="modal-close" onclick="closeMeterModal()">&times;</button>
             </div>
             <div class="modal-body" id="meterModalBody">
-                <p style="text-align: center; color: #64748b;">กำลังโหลดข้อมูล...</p>
+                <p style="text-align: center; color: #64748b; padding: 20px;">กำลังโหลดข้อมูล...</p>
             </div>
             <div class="modal-footer">
+                <button class="btn-action" onclick="window.print()" style="background: #0d6efd;"><i class="fa-solid fa-print"></i> พิมพ์เอกสาร</button>
                 <button class="btn-action" style="background: #6c757d;" onclick="closeMeterModal()">ปิดหน้าต่าง</button>
             </div>
         </div>
@@ -347,6 +392,8 @@
     let filteredData = [];
     let allDailyProductions = [];
     let targetsMap = {};
+    let employeesMap = {};
+    let shortcutMap = [];
     let currentPage = 1;
     const rowsPerPage = 20;
     
@@ -354,13 +401,14 @@
 
     async function fetchAllData() {
         try {
-            const [ordersRes, targetsRes, stepsRes, orderStepsRes, allProdRes, workItemsRes] = await Promise.all([
-                fetch(`${SUPABASE_URL}/orders?select=id_order,order_no,po_no,quantity,id_work&limit=10000`, { headers }),
+            const [ordersRes, targetsRes, stepsRes, orderStepsRes, allProdRes, workItemsRes, employeesRes] = await Promise.all([
+                fetch(`${SUPABASE_URL}/orders?select=id_order,order_no,po_no,quantity,id_work,start_date,end_date&limit=10000`, { headers }),
                 fetch(`${SUPABASE_URL}/targets?select=id_target,id_step,id_work&limit=10000`, { headers }),
                 fetch(`${SUPABASE_URL}/production_steps?select=id_step,step_name&limit=10000`, { headers }),
-                fetch(`${SUPABASE_URL}/order_steps?select=id_order,id_step,end_date&limit=10000`, { headers }),
+                fetch(`${SUPABASE_URL}/order_steps?select=id_order,id_step,end_date,start_date&limit=10000`, { headers }),
                 fetch(`${SUPABASE_URL}/daily_production?select=*&limit=10000`, { headers }),
-                fetch(`${SUPABASE_URL}/work_items?select=id_work,work_code&limit=10000`, { headers })
+                fetch(`${SUPABASE_URL}/work_items?select=id_work,work_code&limit=10000`, { headers }),
+                fetch(`${SUPABASE_URL}/employees?select=id_name,name&limit=10000`, { headers })
             ]);
 
             const orders = await ordersRes.json();
@@ -369,6 +417,9 @@
             const orderSteps = await orderStepsRes.json();
             allDailyProductions = await allProdRes.json();
             const workItems = await workItemsRes.json();
+            const employees = await employeesRes.json();
+
+            employees.forEach(e => { employeesMap[e.id_name] = e.name; });
 
             targets.forEach(t => {
                 let step = steps.find(s => s.id_step === t.id_step);
@@ -376,6 +427,26 @@
                     id_step: t.id_step,
                     step_name: step ? step.step_name : "-"
                 };
+            });
+
+            // สร้าง shortcutMap 5 หลัก (ตามรูปแบบโค้ดเดิมของคุณไพบูลย์: 3 ตัวแรกเลขออร์เดอร์ + 2 ตัวหลังลำดับขั้นตอน)
+            shortcutMap = [];
+            let sortedOrders = [...orders].sort((a,b) => parseInt(a.id_order) - parseInt(b.id_order));
+            sortedOrders.forEach(order => {
+                if (order.id_work) {
+                    let orderTargets = targets.filter(t => String(t.id_work) === String(order.id_work));
+                    orderTargets.sort((a,b) => parseInt(a.id_target) - parseInt(b.id_target));
+                    orderTargets.forEach((target, index) => {
+                        let orderPart = String(order.id_order).padStart(3, '0');
+                        let stepPart = String(index + 1).padStart(2, '0');
+                        shortcutMap.push({
+                            id_order: order.id_order,
+                            id_target: target.id_target,
+                            id_step: target.id_step,
+                            code5: orderPart + stepPart
+                        });
+                    });
+                }
             });
 
             let today = new Date();
@@ -407,7 +478,7 @@
 
                 let diffDays = 0;
                 let statusCat = "NONE"; 
-                let statusText = `<span class="status-gray">ไม่มีกำหนดเสร็จ</span>`;
+                let statusText = '<span class="status-gray">ไม่มีกำหนดเสร็จ</span>';
                 let rawEndDate = os.end_date ? new Date(os.end_date).getTime() : 9999999999999;
                 
                 if (os.end_date) {
@@ -417,24 +488,30 @@
 
                     if (diffDays < 0) { 
                         statusCat = "RED"; 
-                        statusText = `<span class="status-red"><i class="fa-solid fa-circle-exclamation"></i> เลยกำหนด ${Math.abs(diffDays)} วัน</span>`; 
+                        statusText = '<span class="status-red"><i class="fa-solid fa-circle-exclamation"></i> เลยกำหนด ' + Math.abs(diffDays) + ' วัน</span>'; 
                     }
                     else if (diffDays > 0) { 
                         statusCat = "GREEN"; 
-                        statusText = `<span class="status-green"><i class="fa-regular fa-clock"></i> เหลือเวลา ${diffDays} วัน</span>`; 
+                        statusText = '<span class="status-green"><i class="fa-regular fa-clock"></i> เหลือเวลา ' + diffDays + ' วัน</span>'; 
                     }
                     else { 
                         statusCat = "ORANGE"; 
-                        statusText = `<span class="status-orange"><i class="fa-solid fa-bell"></i> ครบกำหนดวันนี้!</span>`; 
+                        statusText = '<span class="status-orange"><i class="fa-solid fa-bell"></i> ครบกำหนดวันนี้!</span>'; 
                     }
                 }
 
-                let uniqueRowId = `${order.order_no}_${step ? step.step_name : 'no_step'}`;
+                let uniqueRowId = order.id_order + '_' + (step ? step.id_step : 'no_step');
+                
+                // หาค่ารหัส 5 หลักจาก shortcutMap
+                let foundShortcut = shortcutMap.find(s => String(s.id_order) === String(order.id_order) && String(s.id_step) === String(step ? step.id_step : ''));
+                let code5 = foundShortcut ? foundShortcut.code5 : String(order.id_order).padStart(5, '0');
 
                 rawData.push({
                     uniqueId: uniqueRowId,
+                    code5: code5,
                     id_order: order.id_order,
                     id_step: step ? step.id_step : null,
+                    targetId: target ? target.id_target : null,
                     orderNo: order.order_no || "-",
                     poNo: order.po_no || "-",
                     workCode: workCodeText,
@@ -445,7 +522,8 @@
                     statusCat: statusCat,
                     statusText: statusText,
                     rawEndDate: rawEndDate,
-                    endDateStr: os.end_date || "-"
+                    endDateStr: os.end_date || "-",
+                    startDateStr: os.start_date || order.start_date || "-"
                 });
             });
 
@@ -453,10 +531,7 @@
 
         } catch (error) {
             console.error("Fetch Error:", error);
-            document.getElementById('tableBody').innerHTML = `
-                <tr><td colspan="9" class="status-red" style="text-align: center; padding: 20px;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> ไม่สามารถเชื่อมต่อฐานข้อมูลได้
-                </td></tr>`;
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="10" class="status-red" style="text-align: center; padding: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> ไม่สามารถเชื่อมต่อฐานข้อมูลได้</td></tr>';
         }
     }
 
@@ -498,6 +573,7 @@
     }
 
     function applyFilters() {
+        let fCode5 = document.getElementById('filterCode5').value.trim().toLowerCase();
         let fOrder = document.getElementById('filterOrder').value.trim().toLowerCase();
         let fPo = document.getElementById('filterPo').value;
         let fWork = document.getElementById('filterWork').value;
@@ -512,9 +588,11 @@
                 return false;
             }
 
+            let matchCode5 = (fCode5 === '' || item.code5.toLowerCase().includes(fCode5));
             let matchOrder = (fOrder === '' || item.orderNo.toLowerCase().includes(fOrder));
             
-            return matchOrder &&
+            return matchCode5 &&
+                   matchOrder &&
                    (fPo === 'ALL' || item.poNo === fPo) &&
                    (fWork === 'ALL' || item.workCode === fWork) &&
                    (fStep === 'ALL' || item.stepName === fStep) &&
@@ -536,6 +614,7 @@
             }
         });
 
+        updateDatalistOptions('code5List', 'code5');
         updateDatalistOptions('orderList', 'orderNo');
         updateDropdownOptions('filterPo', 'poNo', fPo);
         updateDropdownOptions('filterWork', 'workCode', fWork);
@@ -589,15 +668,17 @@
         let showHidden = document.getElementById('showHiddenToggle').checked;
 
         if (pageData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:25px; color:#64748b;">ไม่พบข้อมูลที่ตรงกับตัวกรอง</td></tr>`;
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:25px; color:#64748b;">ไม่พบข้อมูลที่ตรงกับตัวกรอง</td></tr>';
         } else {
             let htmlRows = "";
             pageData.forEach(item => {
                 let isHidden = hiddenRows.includes(item.uniqueId);
                 let rowStyle = (isHidden && showHidden) ? 'opacity: 0.4; background-color: #fee2e2;' : '';
 
+                let safeItem = JSON.stringify(item).replace(/"/g, '&quot;');
                 htmlRows += `
-                    <tr style="${rowStyle}" onclick="openMeterModal('${item.id_order}', '${item.id_step}', '${item.orderNo}', '${item.stepName}')">
+                    <tr style="${rowStyle}" onclick='openMeterModal(${safeItem})'>
+                        <td class="col-code5">${item.code5}</td>
                         <td class="col-order">${item.orderNo}</td>
                         <td class="col-po">${item.poNo}</td>
                         <td class="col-work">${item.workCode}</td>
@@ -607,7 +688,7 @@
                         <td class="col-percent" style="text-align: right;">${item.percent.toFixed(1)}%</td>
                         <td style="text-align: center;">${item.statusText}</td>
                         <td style="text-align: center;" onclick="event.stopPropagation()">
-                            <input type="checkbox" class="theme-checkbox" ${isHidden ? 'checked' : ''} onclick="toggleHideRow('${item.uniqueId}', this.checked)" title="ติ๊กเพื่อซ่อนแถวนี้">
+                            <input type="checkbox" class="theme-checkbox" ${isHidden ? 'checked' : ''} onchange="toggleHideRow('${item.uniqueId}', this.checked)" title="ติ๊กเพื่อซ่อนแถวนี้">
                         </td>
                     </tr>
                 `;
@@ -615,7 +696,7 @@
             tbody.innerHTML = htmlRows;
         }
 
-        document.getElementById('pageInfo').innerHTML = `หน้า <b style="color:#0284c7;">${currentPage}</b> จาก ${totalPages} &nbsp; <span style="color:#94a3b8;">(รวม ${filteredData.length} รายการ)</span>`;
+        document.getElementById('pageInfo').innerHTML = 'หน้า <b style="color:#0284c7;">' + currentPage + '</b> จาก ' + totalPages + ' &nbsp; <span style="color:#94a3b8;">(รวม ' + filteredData.length + ' รายการ)</span>';
         document.getElementById('btnPrev').disabled = (currentPage === 1);
         document.getElementById('btnNext').disabled = (currentPage === totalPages || filteredData.length === 0);
     }
@@ -628,57 +709,151 @@
         renderTable();
     }
 
-    async function openMeterModal(idOrder, idStep, orderNo, stepName) {
-        document.getElementById('meterModalTitle').innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ประวัติใบมิเตอร์: ใบสั่งเลขที่ <span style="color:#0284c7;">${orderNo}</span> (${stepName})`;
-        document.getElementById('meterModalBody').innerHTML = `<p style="text-align: center; color: #64748b; padding: 20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> กำลังดึงประวัติใบมิเตอร์...</p>`;
+    function formatDateThai(dateStr) {
+        if (!dateStr || dateStr === "-") return "-";
+        let d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        let day = String(d.getDate()).padStart(2, '0');
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let year = String(d.getFullYear()).slice(-2);
+        return `${day}/${month}/${year}`;
+    }
+
+    function openMeterModal(item) {
+        document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> กำลังโหลดแบบฟอร์มเอกสาร...</p>';
         document.getElementById('meterModal').style.display = 'flex';
 
         try {
             let matchingLogs = allDailyProductions.filter(p => {
-                if (p.id_order !== idOrder) return false;
+                if (String(p.id_order) !== String(item.id_order)) return false;
+                if (item.targetId) {
+                    return String(p.id_target) === String(item.targetId);
+                }
                 let targetInfo = targetsMap[p.id_target];
-                return targetInfo && String(targetInfo.id_step) === String(idStep);
+                return targetInfo && String(targetInfo.id_step) === String(item.id_step);
             });
 
-            let modalBodyHtml = "";
-            if (matchingLogs.length === 0) {
-                modalBodyHtml = `<p style="text-align: center; color: #64748b; padding: 20px;">ยังไม่มีประวัติการบันทึกข้อมูลรายวัน (ใบมิเตอร์) สำหรับขั้นตอนนึ้ครับ</p>`;
-            } else {
-                let cumulativeSum = 0;
-                modalBodyHtml = `
-                    <table class="meter-table">
+            let cumulativeSum = 0;
+            let rowsHtml = "";
+            const maxRows = 25;
+
+            for (let i = 0; i < maxRows; i++) {
+                if (i < matchingLogs.length) {
+                    let log = matchingLogs[i];
+                    let amount = log.produced_amount || 0;
+                    cumulativeSum += amount;
+                    let recordDate = formatDateThai(log.record_date);
+                    let empName = employeesMap[log.id_name] || "-";
+                    let noGoods = log.nogoods_amount ? log.nogoods_amount : "";
+                    let hours = log.hour_work !== undefined && log.hour_work !== null ? Number(log.hour_work).toFixed(2) : "-";
+                    let remark = log.remark || "";
+                    let smallNum = log.id_target || "";
+
+                    rowsHtml += `
+                        <tr>
+                            <td>${recordDate}</td>
+                            <td>${smallNum}</td>
+                            <td>${amount.toLocaleString()}</td>
+                            <td style="font-weight: bold;">${cumulativeSum.toLocaleString()}</td>
+                            <td>${noGoods}</td>
+                            <td>${hours}</td>
+                            <td style="text-align: left; padding-left: 6px;">${empName}</td>
+                            <td>${remark}</td>
+                        </tr>
+                    `;
+                } else {
+                    rowsHtml += `
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    `;
+                }
+            }
+
+            const baseUrl = window.location.href.split('?')[0];
+            const currentUrl = `${baseUrl}?order_id=${encodeURIComponent(item.id_order)}&target_id=${encodeURIComponent(item.targetId || '')}`;
+
+            let docHtml = `
+                <div class="doc-sheet">
+                    <div class="doc-title">ใบความก้าวหน้าของการผลิต</div>
+                    <div class="doc-header-grid">
+                        <div class="doc-info-left">
+                            <div class="doc-info-row">
+                                <span class="label">ใบสั่งงานเลขที่:</span>
+                                <span class="value" style="font-weight: bold; color: #0284c7;">${item.orderNo}</span>
+                            </div>
+                            <div class="doc-info-row">
+                                <span class="label">ขั้นตอนงาน:</span>
+                                <span class="value" style="font-weight: bold; color: #7c3aed;">${item.stepName}</span>
+                            </div>
+                            <div class="doc-info-row">
+                                <span class="label">ชนิดงาน:</span>
+                                <span class="value" style="font-weight: bold;">${item.workCode}</span>
+                            </div>
+                            <div class="doc-info-row">
+                                <span class="label">จำนวนชิ้นงานสั่งผลิต:</span>
+                                <span class="value" style="font-weight: bold;">${item.qty.toLocaleString()} ชิ้น</span>
+                            </div>
+                            <div class="doc-info-row" style="margin-top: 5px;">
+                                <span class="label">วันที่เริ่ม: ${formatDateThai(item.startDateStr)}</span>
+                                <span class="label" style="min-width: unset; margin-left: 20px;">วันที่เสร็จ: ${formatDateThai(item.endDateStr)}</span>
+                            </div>
+                        </div>
+                        <div class="doc-qr-box">
+                            <div id="modalQrCodeContainer" data-url="${currentUrl}"></div>
+                            <div class="qr-code-label">สแกน / คีย์รหัส</div>
+                            <div class="code5-box">[ ${item.code5} ]</div>
+                        </div>
+                    </div>
+
+                    <table class="doc-table">
                         <thead>
                             <tr>
-                                <th>ลำดับ</th>
-                                <th>รหัส Target ID</th>
-                                <th style="text-align: right;">จำนวนที่ผลิตได้</th>
-                                <th style="text-align: right;">ยอดสะสมรวม</th>
+                                <th style="width: 11%;">วันที่</th>
+                                <th style="width: 10%;">ตัวเลขเล็กงาน</th>
+                                <th style="width: 12%;">ผลิตได้/วัน</th>
+                                <th style="width: 12%;">สะสม</th>
+                                <th style="width: 8%;">เสีย</th>
+                                <th style="width: 10%;">ชั่วโมง</th>
+                                <th style="width: 20%;">ชื่อคนทำ</th>
+                                <th style="width: 17%;">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>
-                `;
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
 
-                matchingLogs.forEach((log, index) => {
-                    let amount = log.produced_amount || 0;
-                    cumulativeSum += amount;
-                    modalBodyHtml += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${log.id_target}</td>
-                            <td style="text-align: right; color: #16a34a; font-weight: 500;">+${amount.toLocaleString()}</td>
-                            <td style="text-align: right; font-weight: 600;">${cumulativeSum.toLocaleString()}</td>
-                        </tr>
-                    `;
-                });
+            document.getElementById('meterModalBody').innerHTML = docHtml;
 
-                modalBodyHtml += `</tbody></table>`;
-            }
-
-            document.getElementById('meterModalBody').innerHTML = modalBodyHtml;
+            // สร้าง QR Code อัตโนมัติ
+            setTimeout(() => {
+                let qrEl = document.getElementById('modalQrCodeContainer');
+                if (qrEl) {
+                    qrEl.innerHTML = "";
+                    new QRCode(qrEl, {
+                        text: qrEl.getAttribute('data-url'),
+                        width: 90,
+                        height: 90,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+                }
+            }, 100);
 
         } catch (err) {
-            console.error("Error loading meter logs:", err);
-            document.getElementById('meterModalBody').innerHTML = `<p style="text-align: center; color: #dc2626; padding: 20px;">เกิดข้อผิดพลาดในการโหลดข้อมูลใบมิเตอร์</p>`;
+            console.error("Error generating doc preview:", err);
+            document.getElementById('meterModalBody').innerHTML = '<p style="text-align: center; color: #dc2626; padding: 20px;">เกิดข้อผิดพลาดในการสร้างพรีวิวเอกสาร</p>';
         }
     }
 
@@ -692,15 +867,15 @@
             return;
         }
 
-        let reportText = `📋 รายงานสรุปติดตามงานผลิต (สถานะปัจจุบัน)\n`;
-        reportText += `--------------------------------------------------\n`;
+        let reportText = "📋 รายงานสรุปติดตามงานผลิต (สถานะปัจจุบัน)\n";
+        reportText += "--------------------------------------------------\n";
         
         filteredData.forEach((item, index) => {
-            reportText += `${index + 1}. ใบสั่ง: ${item.orderNo} | PO: ${item.poNo} | สินค้า: ${item.workCode}\n`;
-            reportText += `   - ขั้นตอน: ${item.stepName}\n`;
-            reportText += `   - ยอดผลิต: ${item.produced.toLocaleString()} / ${item.qty.toLocaleString()} (${item.percent.toFixed(1)}%)\n`;
-            reportText += `   - สถานะ: ${item.statusCat === 'RED' ? 'เลยกำหนด' : item.statusCat === 'ORANGE' ? 'ครบกำหนดวันนี้' : 'ปกติ'}\n`;
-            reportText += `--------------------------------------------------\n`;
+            reportText += (index + 1) + ". รหัส: " + item.code5 + " | ใบสั่ง: " + item.orderNo + " | PO: " + item.poNo + " | สินค้า: " + item.workCode + "\n";
+            reportText += "   - ขั้นตอน: " + item.stepName + "\n";
+            reportText += "   - ยอดผลิต: " + item.produced.toLocaleString() + " / " + item.qty.toLocaleString() + " (" + item.percent.toFixed(1) + "%)\n";
+            reportText += "   - สถานะ: " + (item.statusCat === 'RED' ? 'เลยกำหนด' : item.statusCat === 'ORANGE' ? 'ครบกำหนดวันนี้' : 'ปกติ') + "\n";
+            reportText += "--------------------------------------------------\n";
         });
 
         document.getElementById('reportTextContent').value = reportText;
