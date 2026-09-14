@@ -33,15 +33,19 @@
             font-size: 0.85rem;
         }
 
-        .btn-home {
+        .nav-buttons-left {
             position: fixed; top: 15px; left: 15px;
+            display: flex; gap: 8px; z-index: 1000;
+        }
+
+        .btn-home, .btn-guide {
             background: #ffffff; border: 1px solid #ced4da; color: #495057;
             padding: 6px 14px; border-radius: 6px; font-size: 0.8rem;
             font-weight: 600; cursor: pointer; text-decoration: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             display: flex; align-items: center; gap: 6px; transition: all 0.2s;
         }
-        .btn-home:hover { background: #e9ecef; color: #212529; border-color: #adb5bd; }
+        .btn-home:hover, .btn-guide:hover { background: #e9ecef; color: #212529; border-color: #adb5bd; }
 
         .top-action-bar {
             max-width: 1400px; margin: 0 auto 10px auto;
@@ -148,7 +152,6 @@
         .btn-page:hover:not(:disabled) { background: #f1f5f9; color: #1e293b; border-color: #94a3b8; }
         .btn-page:disabled { background: #f8f9fa; color: #adb5bd; border-color: #e9ecef; cursor: not-allowed; }
 
-        /* Badge แสดงสถานะ Real-time Connection */
         .realtime-badge {
             display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem;
             background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 12px; font-weight: 500;
@@ -156,7 +159,7 @@
         }
         .realtime-dot { width: 7px; height: 7px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite; }
 
-        /* Modal พรีวิวใบความก้าวหน้าของการผลิต */
+        /* Modal โครงสร้างทั่วไป */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
@@ -172,7 +175,7 @@
         .modal-body { overflow-y: auto; max-height: 78vh; padding-right: 5px; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #dee2e6; padding-top: 10px; }
 
-        /* ดีไซน์กระดาษเอกสารพรีวิวคู่ (A4 แนวนอน - ซ้าย/ขวาเต็มสัดส่วน) */
+        /* ดีไซน์กระดาษเอกสารพรีวิวคู่ (A4 แนวนอน) */
         .doc-sheet {
             background: #fff; padding: 5px; font-family: 'Prompt', sans-serif; color: #000;
             display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;
@@ -200,8 +203,15 @@
         .print-table th, .print-table td { border: 1px solid #000; padding: 4px 4px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .print-table th { background-color: #f1f5f9; font-weight: bold; }
         .print-table tbody tr { height: 22px; }
-
         .print-footer { display: flex; justify-content: space-between; font-size: 0.7rem; border-top: 1.5px solid #000; padding-top: 4px; font-weight: bold; }
+
+        /* สไตล์หน้าคู่มือการใช้งาน */
+        .guide-content { font-family: 'Prompt', sans-serif; color: #1e293b; padding: 10px; line-height: 1.6; }
+        .guide-content h2 { font-size: 1.2rem; color: #0d6efd; margin-bottom: 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+        .guide-content h3 { font-size: 1rem; color: #334155; margin-top: 15px; margin-bottom: 6px; font-weight: 600; }
+        .guide-content p, .guide-content li { font-size: 0.85rem; color: #475569; margin-bottom: 6px; }
+        .guide-content ul { padding-left: 20px; margin-bottom: 10px; }
+        .guide-box { background: #f8f9fa; border-left: 4px solid #0d6efd; padding: 10px 15px; margin: 10px 0; border-radius: 0 6px 6px 0; }
 
         @media print {
             body * { visibility: hidden; }
@@ -210,15 +220,26 @@
             .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; padding: 0 !important; }
             .modal-header, .modal-footer { display: none !important; }
             .doc-sheet { border: none !important; padding: 0 !important; width: 100% !important; height: 100% !important; gap: 10mm !important; }
-            @page { size: A4 landscape; margin: 5mm; }
+
+            /* พิมพ์เฉพาะหน้าคู่มือ */
+            #guideModal, #guideModal * { visibility: visible; }
+            #guideModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #fff; padding: 0; }
+            #guideModal .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; }
+            #guideModal .modal-header, #guideModal .modal-footer { display: none !important; }
+            @page { size: A4 portrait; margin: 15mm; }
         }
     </style>
 </head>
 <body>
 
-    <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="btn-home">
-        <i class="fa-solid fa-house"></i> หน้าหลัก (Home)
-    </a>
+    <div class="nav-buttons-left">
+        <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="btn-home">
+            <i class="fa-solid fa-house"></i> หน้าหลัก
+        </a>
+        <button class="btn-guide" onclick="openGuideModal()">
+            <i class="fa-solid fa-book-open"></i> คู่มือการใช้งาน
+        </button>
+    </div>
 
     <div class="top-action-bar">
         <div class="form-check form-switch" style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;">
@@ -365,6 +386,48 @@
         </div>
     </div>
 
+    <!-- Modal คู่มือการใช้งาน -->
+    <div id="guideModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-book-open"></i> คู่มือการใช้งานระบบสรุปงานผลิต (JAGUAR_PRODUCTION)</h3>
+                <button class="modal-close" onclick="closeGuideModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="guide-content">
+                    <h2>📖 คู่มือการใช้งานระบบติดตามและสรุปยอดผลิต</h2>
+                    
+                    <h3>1. การค้นหาและกรองข้อมูล</h3>
+                    <p>ระบบสามารถกรองข้อมูลแยกตามคอลัมน์ได้ทันที เช่น พิมพ์รหัสค้นหา 5 หลัก, ค้นหาเลขที่ใบสั่งผลิต, หรือเลือกกรองเฉพาะเลขที่ PO, รหัสชิ้นงาน, และขั้นตอนการทำงานที่ต้องการ</p>
+
+                    <h3>2. สถานะกำหนดส่งและการผลิตครบถ้วน</h3>
+                    <ul>
+                        <li><strong style="color: #16a34a;">ขั้นตอนนี้ ผลิตครบแล้ว:</strong> ระบบจะแสดงสถานะนี้อัตโนมัติเมื่อยอดผลิตสะสมถึง <strong>95% ขึ้นไป</strong> ของจำนวนสั่งผลิต</li>
+                        <li><strong style="color: #dc2626;">เลยกำหนด / ครบกำหนดวันนี้ / ยังไม่ถึงกำหนด:</strong> แสดงสถานะตามกำหนดเวลาส่งมอบงานจริง</li>
+                    </ul>
+
+                    <h3>3. การพรีวิวและพิมพ์ใบความก้าวหน้าของการผลิต</h3>
+                    <div class="guide-box">
+                        <p>• คลิกที่แถวรายการงานผลิตใดๆ ในตาราง ระบบจะเปิดหน้าต่างพรีวิว <strong>"ใบความก้าวหน้าของการผลิต"</strong> แบบฟอร์มคู่ (ซ้าย-ขวา) บนกระดาษ A4 แนวนอน</p>
+                        <p>• สามารถสแกน QR Code เพื่อเปิดลิงก์ไปยังหน้าบันทึกด่วน (Fast Form) ได้ทันที</p>
+                        <p>• กดปุ่ม <strong>"พิมพ์เอกสาร"</strong> ในหน้าต่างพรีวิวเพื่อปริ้นท์เอกสารออกมาใช้งานจริง</p>
+                    </div>
+
+                    <h3>4. ฟังก์ชันการซ่อนรายการและการสร้างรายงาน</h3>
+                    <ul>
+                        <li><strong>ปุ่มซ่อน (ช่องขวาสุด):</strong> สามารถติ๊กเพื่อซ่อนรายการที่ไม่ใช้งาน และเลือกเปิด/ปิดการแสดงรายการที่ซ่อนได้ที่มุมบนขวา</li>
+                        <li><strong>สร้างรายงานสรุปตามงาน:</strong> รวบรวมข้อมูลสถานะตามตัวกรองปัจจุบันเป็นข้อความ เพื่อคัดลอกส่งหัวหน้าแผนกได้อย่างรวดเร็ว</li>
+                        <li><strong>ระบบ Real-time:</strong> ข้อมูลยอดผลิตจะอัปเดตอัตโนมัติทันทีที่มีการบันทึกข้อมูลใหม่โดยไม่ต้องรีเฟรชหน้าจอ</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-action" onclick="printGuide()" style="background: #0d6efd;"><i class="fa-solid fa-print"></i> พิมพ์คู่มือ</button>
+                <button class="btn-action" style="background: #6c757d;" onclick="closeGuideModal()">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal พรีวิวใบความก้าวหน้าของการผลิต -->
     <div id="meterModal" class="modal-overlay">
         <div class="modal-box">
@@ -406,7 +469,6 @@
     const SUPABASE_KEY = "sb_publishable_ohToE8Z_Fzo87uBtzdPDIg_cqHCi3HT";
     const restHeaders = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" };
 
-    // สร้าง Supabase Client สำหรับ Real-time
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let rawData = [];
@@ -475,7 +537,7 @@
             });
 
             buildRawDataAndRender();
-            setupRealtimeSubscription(); // เปิดช่องฟังการเปลี่ยนแปลงข้อมูลแบบ Real-time
+            setupRealtimeSubscription();
 
         } catch (error) {
             console.error("Fetch Error:", error);
@@ -483,7 +545,6 @@
         }
     }
 
-    // ฟังก์ชันสร้างและคำนวณข้อมูลดิบใหม่เมื่อมีข้อมูลยอดผลิตเปลี่ยนแปลง
     function buildRawDataAndRender() {
         let today = new Date();
         today.setHours(0,0,0,0);
@@ -517,7 +578,6 @@
             let statusText = '<span class="status-gray">ไม่มีกำหนดเสร็จ</span>';
             let rawEndDate = os.end_date ? new Date(os.end_date).getTime() : 9999999999999;
             
-            // เช็คเปอร์เซ็นต์ผลิตครบ 95% ขึ้นไป
             if (percent >= 95) {
                 statusCat = "COMPLETE";
                 statusText = '<span class="status-green"><i class="fa-solid fa-circle-check"></i> ขั้นตอนนี้ ผลิตครบแล้ว</span>';
@@ -568,12 +628,10 @@
         applyFilters();
     }
 
-    // ตั้งค่า Supabase Realtime ฟังการเปลี่ยนแปลงตาราง daily_production
     function setupRealtimeSubscription() {
         supabaseClient
             .channel('public:daily_production')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_production' }, async (payload) => {
-                console.log('⚡ Real-time update detected:', payload);
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/daily_production?select=*&limit=10000`, { headers: restHeaders });
                 if (res.ok) {
                     allDailyProductions = await res.json();
@@ -906,6 +964,17 @@
 
     function closeMeterModal() {
         document.getElementById('meterModal').style.display = 'none';
+    }
+
+    // ฟังก์ชันเปิด-ปิด และพิมพ์คู่มือ
+    function openGuideModal() {
+        document.getElementById('guideModal').style.display = 'flex';
+    }
+    function closeGuideModal() {
+        document.getElementById('guideModal').style.display = 'none';
+    }
+    function printGuide() {
+        window.print();
     }
 
     function openReportModal() {
