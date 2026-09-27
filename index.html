@@ -174,10 +174,12 @@
         .doc-sheet {
             background: #fff; padding: 10px; font-family: 'Prompt', sans-serif; color: #000;
             display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; max-width: 1350px; margin: 0 auto;
+            margin-bottom: 20px; /* เว้นระยะห่างแต่ละแผ่นตอนดูบนจอ */
         }
         .print-card {
             border: 2px solid #000; padding: 15px; background: #fff;
             display: flex; flex-direction: column; justify-content: space-between; width: 100%; box-sizing: border-box;
+            height: 100%; min-height: 500px;
         }
         .print-header-top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
         .print-title-area h3 { margin: 0 0 6px 0; font-size: 1.1rem; text-align: center; font-weight: bold; text-decoration: underline; }
@@ -199,7 +201,7 @@
         .print-table th, .print-table td { border: 1px solid #000; padding: 4px 2px; text-align: center; overflow: hidden; text-overflow: clip; white-space: nowrap; }
         .print-table th { background-color: #f1f5f9; font-weight: bold; font-size: 0.68rem; }
         .print-table tbody tr { height: 22px; }
-        .print-footer { display: flex; justify-content: space-between; font-size: 0.7rem; border-top: 1.5px solid #000; padding-top: 4px; font-weight: bold; }
+        .print-footer { display: flex; justify-content: space-between; font-size: 0.7rem; border-top: 1.5px solid #000; padding-top: 4px; font-weight: bold; margin-top: auto; }
 
         .guide-content { font-family: 'Prompt', sans-serif; color: #1e293b; padding: 10px; line-height: 1.6; }
         .guide-content h2 { font-size: 1.2rem; color: #0d6efd; margin-bottom: 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
@@ -211,14 +213,19 @@
         @media print {
             body * { visibility: hidden; }
             #meterModal, #meterModal * { visibility: visible; }
-            #meterModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #fff; padding: 0; }
-            .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; padding: 0 !important; }
+            /* ปลดล็อค height เพื่อให้พิมพ์ได้หลายหน้า */
+            #meterModal { position: absolute; left: 0; top: 0; width: 100%; height: auto; background: #fff; padding: 0; }
+            .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: none !important; padding: 0 !important; overflow: visible !important; }
+            .modal-body { overflow: visible !important; max-height: none !important; padding: 0 !important; }
             .modal-header, .modal-footer { display: none !important; }
-            .doc-sheet { border: none !important; padding: 0 !important; width: 100% !important; height: 100% !important; }
+            
+            /* แบ่งหน้ากระดาษเมื่อเจอ doc-sheet แผ่นใหม่ */
+            .doc-sheet { border: none !important; padding: 0 !important; width: 100% !important; height: auto !important; margin-bottom: 0; page-break-after: always; display: grid !important; }
+            .doc-sheet:last-child { page-break-after: auto; }
 
             #guideModal, #guideModal * { visibility: visible; }
-            #guideModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #fff; padding: 0; }
-            #guideModal .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: 100% !important; }
+            #guideModal { position: absolute; left: 0; top: 0; width: 100%; height: auto; background: #fff; padding: 0; }
+            #guideModal .modal-box { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; max-height: none !important; overflow: visible !important; }
             #guideModal .modal-header, #guideModal .modal-footer { display: none !important; }
             @page { size: A4 landscape; margin: 10mm; }
         }
@@ -861,7 +868,8 @@
         return `${day}/${month}/${year}`;
     }
 
-    function getCardHtml(cardItem) {
+    // ฟังก์ชันสร้างหน้ากระดาษหลายๆ หน้า รองรับข้อมูลเกิน 20 แถว
+    function getMeterPagesHtml(cardItem) {
         if (!cardItem) return "";
 
         let matchingLogs = allDailyProductions.filter(p => {
@@ -880,87 +888,115 @@
         });
 
         let cumulativeSum = 0;
-        let rowsHtml = "";
-        let totalRowsToDisplay = Math.max(20, matchingLogs.length);
-
-        for (let i = 0; i < totalRowsToDisplay; i++) {
-            if (i < matchingLogs.length) {
-                let log = matchingLogs[i];
-                let amount = log.produced_amount || 0;
-                cumulativeSum += amount;
-                let recordDate = formatDateThai(log.record_date);
-                let empName = employeesMap[log.id_name] || "-";
-                let noGoods = log.nogoods_amount ? log.nogoods_amount : "";
-                let hours = log.hour_work !== undefined && log.hour_work !== null ? Number(log.hour_work).toFixed(2) : "-";
-                let remark = log.remark || "";
-
-                rowsHtml += `
-                    <tr>
-                        <td>${recordDate}</td>
-                        <td></td>
-                        <td>${amount.toLocaleString()}</td>
-                        <td style="font-weight: bold;">${cumulativeSum.toLocaleString()}</td>
-                        <td>${noGoods}</td>
-                        <td>${hours}</td>
-                        <td style="text-align: left; padding-left: 4px;">${empName}</td>
-                        <td style="text-align: left; padding-left: 4px; overflow: hidden; text-overflow: ellipsis;">${remark}</td>
-                    </tr>
-                `;
-            } else {
-                rowsHtml += `
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                `;
-            }
-        }
-
+        let totalLogs = matchingLogs.length;
+        let totalPages = Math.max(1, Math.ceil(totalLogs / 20));
+        let cardsHtml = [];
         const fastFormUrl = `https://paiboon-creater.github.io/fast_form_daily/?code5=${encodeURIComponent(cardItem.code5)}`;
 
-        return `
-            <div class="print-card">
-                <div class="print-header-top">
-                    <div style="flex-grow: 1; overflow: hidden; padding-right: 8px;">
-                        <div class="print-title-area"><h3>ใบความก้าวหน้าของการผลิต</h3></div>
-                        <div class="print-meta-row"><span class="print-label">ใบสั่งงานเลขที่:</span><span class="print-value" style="color: #0284c7;">${cardItem.orderNo}</span><span class="print-label" style="margin-left: 8px;">ขั้นตอนงาน:</span><span class="print-value" style="color: #7c3aed;">${cardItem.stepName}</span></div>
-                        <div class="print-meta-row"><span class="print-label">ชนิดงาน:</span> <span class="print-value">${cardItem.workCode}</span></div>
-                        <div class="print-meta-row"><span class="print-label">จำนวนชิ้นงานสั่งผลิต:</span> <span class="print-value">${cardItem.qty.toLocaleString()} ชิ้น</span></div>
-                        <div class="print-meta-row"><span class="print-label">วันที่เริ่ม:</span> <span class="print-value">${formatDateThai(cardItem.startDateStr)}</span><span class="print-label" style="margin-left: 8px;">วันที่เสร็จ:</span> <span class="print-value">${formatDateThai(cardItem.endDateStr)}</span></div>
-                    </div>
-                    <div class="print-qr-box">
-                        <div class="modalQrCodeContainer" data-url="${fastFormUrl}"></div>
-                        <span>สแกนเข้า Fast Form</span>
-                        <a href="${fastFormUrl}" target="_blank" class="print-code-link">[ ${cardItem.code5} ]</a>
-                    </div>
-                </div>
+        let logIndex = 0;
 
-                <table class="print-table">
-                    <thead>
+        // วนลูปสร้างการ์ด (ตาราง) ทีละ 20 แถว
+        for (let page = 0; page < totalPages; page++) {
+            let rowsHtml = "";
+            for (let i = 0; i < 20; i++) {
+                if (logIndex < totalLogs) {
+                    let log = matchingLogs[logIndex];
+                    let amount = log.produced_amount || 0;
+                    cumulativeSum += amount;
+                    let recordDate = formatDateThai(log.record_date);
+                    let empName = employeesMap[log.id_name] || "-";
+                    let noGoods = log.nogoods_amount ? log.nogoods_amount : "";
+                    let hours = log.hour_work !== undefined && log.hour_work !== null ? Number(log.hour_work).toFixed(2) : "-";
+                    let remark = log.remark || "";
+
+                    rowsHtml += `
                         <tr>
-                            <th width="12%">วันที่</th>
-                            <th width="12%">ตัวเลขตอนเลิกงาน</th>
-                            <th width="11%">ผลิตได้/วัน</th>
-                            <th width="11%">สะสม</th>
-                            <th width="7%">เสีย</th>
-                            <th width="8%">ชั่วโมง</th>
-                            <th width="19%">ชื่อคนทำ</th>
-                            <th width="20%">หมายเหตุ</th>
+                            <td>${recordDate}</td>
+                            <td></td>
+                            <td>${amount.toLocaleString()}</td>
+                            <td style="font-weight: bold;">${cumulativeSum.toLocaleString()}</td>
+                            <td>${noGoods}</td>
+                            <td>${hours}</td>
+                            <td style="text-align: left; padding-left: 4px;">${empName}</td>
+                            <td style="text-align: left; padding-left: 4px; overflow: hidden; text-overflow: ellipsis;">${remark}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-                <div class="print-footer"><span>F-PR-005-00</span><span>DAILY PRODUCTION TRACKER</span></div>
-            </div>
-        `;
+                    `;
+                    logIndex++;
+                } else {
+                    rowsHtml += `
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    `;
+                }
+            }
+
+            let pageFooterInfo = totalPages > 1 ? `<span style="color:#0284c7; font-size: 0.9rem; margin-left: 10px;">(หน้า ${page + 1}/${totalPages})</span>` : "";
+
+            let cardHtml = `
+                <div class="print-card">
+                    <div class="print-header-top">
+                        <div style="flex-grow: 1; overflow: hidden; padding-right: 8px;">
+                            <div class="print-title-area">
+                                <h3>ใบความก้าวหน้าของการผลิต ${pageFooterInfo}</h3>
+                            </div>
+                            <div class="print-meta-row"><span class="print-label">ใบสั่งงานเลขที่:</span><span class="print-value" style="color: #0284c7;">${cardItem.orderNo}</span><span class="print-label" style="margin-left: 8px;">ขั้นตอนงาน:</span><span class="print-value" style="color: #7c3aed;">${cardItem.stepName}</span></div>
+                            <div class="print-meta-row"><span class="print-label">ชนิดงาน:</span> <span class="print-value">${cardItem.workCode}</span></div>
+                            <div class="print-meta-row"><span class="print-label">จำนวนชิ้นงานสั่งผลิต:</span> <span class="print-value">${cardItem.qty.toLocaleString()} ชิ้น</span></div>
+                            <div class="print-meta-row"><span class="print-label">วันที่เริ่ม:</span> <span class="print-value">${formatDateThai(cardItem.startDateStr)}</span><span class="print-label" style="margin-left: 8px;">วันที่เสร็จ:</span> <span class="print-value">${formatDateThai(cardItem.endDateStr)}</span></div>
+                        </div>
+                        <div class="print-qr-box">
+                            <div class="modalQrCodeContainer" data-url="${fastFormUrl}"></div>
+                            <span>สแกนเข้า Fast Form</span>
+                            <a href="${fastFormUrl}" target="_blank" class="print-code-link">[ ${cardItem.code5} ]</a>
+                        </div>
+                    </div>
+
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th width="12%">วันที่</th>
+                                <th width="12%">ตัวเลขตอนเลิกงาน</th>
+                                <th width="11%">ผลิตได้/วัน</th>
+                                <th width="11%">สะสม</th>
+                                <th width="7%">เสีย</th>
+                                <th width="8%">ชั่วโมง</th>
+                                <th width="19%">ชื่อคนทำ</th>
+                                <th width="20%">หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                    <div class="print-footer"><span>F-PR-005-00</span><span>DAILY PRODUCTION TRACKER</span></div>
+                </div>
+            `;
+            cardsHtml.push(cardHtml);
+        }
+
+        // จับคู่การ์ด 2 ใบต่อ 1 แผ่น A4 แนวนอน
+        let finalHtml = "";
+        for (let i = 0; i < cardsHtml.length; i += 2) {
+            let leftCard = cardsHtml[i];
+            let rightCard = (i + 1 < cardsHtml.length) ? cardsHtml[i + 1] : '<div style="visibility: hidden;"></div>';
+            
+            finalHtml += `
+                <div class="doc-sheet">
+                    ${leftCard}
+                    ${rightCard}
+                </div>
+            `;
+        }
+
+        return finalHtml;
     }
 
     function openMeterModal(item) {
@@ -968,12 +1004,8 @@
         document.getElementById('meterModal').style.display = 'flex';
 
         try {
-            let docHtml = `
-                <div class="doc-sheet">
-                    ${getCardHtml(item)}
-                    <div style="visibility: hidden;"></div>
-                </div>
-            `;
+            // เรียกฟังก์ชันใหม่ที่คืนค่า HTML เป็นแผ่นกระดาษเรียบร้อยแล้ว
+            let docHtml = getMeterPagesHtml(item);
 
             document.getElementById('meterModalBody').innerHTML = docHtml;
 
