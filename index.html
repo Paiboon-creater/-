@@ -597,17 +597,27 @@
         }
     }
 
-    // ฟังก์ชันอัจฉริยะ: ทำความสะอาดและจัดกลุ่มชื่อ Foreman ให้เป็นคนเดียวกันหากชื่อหลักตรงกัน
+    // ฟังก์ชันแปลงชื่อหัวหน้างานตามที่ระบุ
     function normalizeForemanName(rawName) {
         if (!rawName || rawName.trim() === "") return "ไม่ระบุ";
         let name = rawName.trim();
-        // ลบคำนำหน้า ตำแหน่ง หรือคำพ่วงท้ายออกเพื่อให้เหลือชื่อหลัก
+        let lowerName = name.toLowerCase();
+
+        // ตรวจสอบและแปลงตามเงื่อนไขที่กำหนด
+        if (lowerName.includes("แก้ว")) {
+            return "คุณแก้ว มณีศรี";
+        }
+        if (lowerName.includes("เวียง")) {
+            return "คุณเวียง คุณบุญสม";
+        }
+        if (lowerName.includes("สุกี") || lowerName.includes("สกี")) {
+            return "คุณสุกี เพชรชื่น";
+        }
+
+        // ค่าเริ่มต้นหากไม่ตรงเงื่อนไข (ตัดคำนำหน้า/ตำแหน่งทั่วไปทิ้ง)
         name = name.replace(/^(คุณ|นาย|นาง|นางสาว|ผจก\.?|หัวหน้าแผนก|หัวหน้า|หน\.)/g, "").trim();
-        // ดึงเอาเฉพาะคำแรกสุดที่เป็นชื่อหลัก (เช่น "แก้วมณีศรี หัวหน้าแผนกครัวเรือน" จะดึงคำว่า "แก้วมณีศรี")
         let parts = name.split(/\s+/);
-        let cleanName = parts[0] ? parts[0] : rawName;
-        // คืนค่าชื่อหลักตัวแรกแบบจัดรูปแบบมาตรฐาน (เช่น ตัวอักษรพิมพ์ใหญ่/เล็กให้สอดคล้องกัน)
-        return cleanName;
+        return parts[0] ? parts[0] : rawName;
     }
 
     function buildRawDataAndRender() {
@@ -624,7 +634,6 @@
             let stepNameFull = step ? step.step_name : "";
             let stepLevel = (step && step.level !== undefined && step.level !== null) ? parseInt(step.level) : 999;
             
-            // นำชื่อมาจัดกลุ่มรวมกันผ่านฟังก์ชันอัจฉริยะ
             let foremanName = step && step.foreman ? normalizeForemanName(step.foreman) : "ไม่ระบุ"; 
 
             if (stepNameFull.includes('แก้')) return;
@@ -1115,7 +1124,7 @@
         window.print();
     }
 
-    // สร้างรายงานรูปแบบตารางแยกตาม Foreman (รวมชื่อเดียวกันอัตโนมัติ เรียงวันที่น้อยไปมาก)
+    // สร้างรายงานรูปแบบตารางแยกตาม Foreman (เรียงวันที่น้อยไปมาก)
     function openReportModal() {
         if (filteredData.length === 0) {
             alert("ไม่มีข้อมูลในตารางสำหรับสร้างรายงานครับ");
