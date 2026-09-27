@@ -597,6 +597,17 @@
         }
     }
 
+    // ฟังก์ชันทำความสะอาดและจัดกลุ่มชื่อ Foreman ให้เป็นคนเดียวกันหากชื่อหลักตรงกัน
+    function normalizeForemanName(rawName) {
+        if (!rawName || rawName.trim() === "") return "ไม่ระบุ";
+        let name = rawName.trim();
+        // ตัดคำนำหน้าหรือตำแหน่งออกเพื่อเทียบชื่อหลัก
+        name = name.replace(/^(คุณ|นาย|นาง|นางสาว|ผจก\.?|หัวหน้าแผนก|หัวหน้า|หน\.)/g, "").trim();
+        // เอาเฉพาะคำแรกหรือชื่อหลัก (เช่น "แก้วมณีศรี หัวหน้าแผนกครัวเรือน" -> เอาคำว่า แก้วมณีศรี)
+        let parts = name.split(/\s+/);
+        return parts[0] ? parts[0] : rawName;
+    }
+
     function buildRawDataAndRender() {
         let today = new Date();
         today.setHours(0,0,0,0);
@@ -610,7 +621,9 @@
             let step = stepsCache.find(s => s.id_step === os.id_step);
             let stepNameFull = step ? step.step_name : "";
             let stepLevel = (step && step.level !== undefined && step.level !== null) ? parseInt(step.level) : 999;
-            let foremanName = step && step.foreman ? step.foreman : "ไม่ระบุ"; 
+            
+            // ใช้ฟังก์ชัน normalized ให้ชื่อตรงกันนับเป็นคนเดียวกัน
+            let foremanName = step && step.foreman ? normalizeForemanName(step.foreman) : "ไม่ระบุ"; 
 
             if (stepNameFull.includes('แก้')) return;
 
@@ -1100,7 +1113,7 @@
         window.print();
     }
 
-    // สร้างรายงานรูปแบบตารางแยกตาม Foreman (เรียงกำหนดเสร็จตามใบสั่ง น้อยไปมาก)
+    // สร้างรายงานรูปแบบตารางแยกตาม Foreman (รวมชื่อเดียวกันอัตโนมัติ เรียงวันที่น้อยไปมาก)
     function openReportModal() {
         if (filteredData.length === 0) {
             alert("ไม่มีข้อมูลในตารางสำหรับสร้างรายงานครับ");
@@ -1194,9 +1207,3 @@
 
     function closeReportModal() {
         document.getElementById('reportModal').style.display = 'none';
-    }
-
-    document.addEventListener("DOMContentLoaded", fetchAllData);
-</script>
-</body>
-</html>
