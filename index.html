@@ -597,15 +597,17 @@
         }
     }
 
-    // ฟังก์ชันทำความสะอาดและจัดกลุ่มชื่อ Foreman ให้เป็นคนเดียวกันหากชื่อหลักตรงกัน
+    // ฟังก์ชันอัจฉริยะ: ทำความสะอาดและจัดกลุ่มชื่อ Foreman ให้เป็นคนเดียวกันหากชื่อหลักตรงกัน
     function normalizeForemanName(rawName) {
         if (!rawName || rawName.trim() === "") return "ไม่ระบุ";
         let name = rawName.trim();
-        // ตัดคำนำหน้าหรือตำแหน่งออกเพื่อเทียบชื่อหลัก
+        // ลบคำนำหน้า ตำแหน่ง หรือคำพ่วงท้ายออกเพื่อให้เหลือชื่อหลัก
         name = name.replace(/^(คุณ|นาย|นาง|นางสาว|ผจก\.?|หัวหน้าแผนก|หัวหน้า|หน\.)/g, "").trim();
-        // เอาเฉพาะคำแรกหรือชื่อหลัก (เช่น "แก้วมณีศรี หัวหน้าแผนกครัวเรือน" -> เอาคำว่า แก้วมณีศรี)
+        // ดึงเอาเฉพาะคำแรกสุดที่เป็นชื่อหลัก (เช่น "แก้วมณีศรี หัวหน้าแผนกครัวเรือน" จะดึงคำว่า "แก้วมณีศรี")
         let parts = name.split(/\s+/);
-        return parts[0] ? parts[0] : rawName;
+        let cleanName = parts[0] ? parts[0] : rawName;
+        // คืนค่าชื่อหลักตัวแรกแบบจัดรูปแบบมาตรฐาน (เช่น ตัวอักษรพิมพ์ใหญ่/เล็กให้สอดคล้องกัน)
+        return cleanName;
     }
 
     function buildRawDataAndRender() {
@@ -622,7 +624,7 @@
             let stepNameFull = step ? step.step_name : "";
             let stepLevel = (step && step.level !== undefined && step.level !== null) ? parseInt(step.level) : 999;
             
-            // ใช้ฟังก์ชัน normalized ให้ชื่อตรงกันนับเป็นคนเดียวกัน
+            // นำชื่อมาจัดกลุ่มรวมกันผ่านฟังก์ชันอัจฉริยะ
             let foremanName = step && step.foreman ? normalizeForemanName(step.foreman) : "ไม่ระบุ"; 
 
             if (stepNameFull.includes('แก้')) return;
@@ -1207,3 +1209,9 @@
 
     function closeReportModal() {
         document.getElementById('reportModal').style.display = 'none';
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchAllData);
+</script>
+</body>
+</html>
